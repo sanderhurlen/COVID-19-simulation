@@ -7,68 +7,58 @@ A agent-based model of COVID-19 spread. Created for use in Statistics and Simula
 *IR201812 Statistikk og Simulering*
 
 **Del I: Reprodusere scenarioene i Washington Post-artikkelen**
-Utgangspunktet for prosjektet blir denne artikkelen i Washington Post:
-[https://www.washingtonpost.com/graphics/2020/world/corona-simulator/](Corona simulator)
+Utgangspunktet for prosjektet blir denne artikkelen i Washington Post:  [article](https://www.washingtonpost.com/graphics/2020/world/corona-simulator/)
 I artikkelen anvendes SIR-modellen (susceptible-infectuous-recovered) for å
 skissere et svært forenklet bilde av virkeligheten, men som gir mye innsikt i
 noen essensielle egenskaper av spredningsforløpet.
-En intro om bl.a. SIR-modeller:
-[https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology](intro)
+En intro om bl.a. SIR-modeller: [article](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology)
 Vi skal ikke bruke den samme modellen som i Washington Post-artikkelen,
 men vi bruker rasterbasert simulering (enten av agenter som beveger seg på
 et rutenett, eller en cellular automaton). I Wikipedia-artikkelen over vises en
 slik rasterbasert simulering av en SIR-model.
-Mål
-1. Målet i del I er å reprodusere scenarioene fra Washington Postartikkelen. I den første scenarioen (fri mobilitet) skal du først tilpasse
-sannsynligheten for at en smittsom person smitter en tilfeldig frisk
-person slik at hver smittsom person i begynnelsen av simuleringen
-(den eksponentielle fasen) smitter ca. 2,5 andre personer, som er
-omtrent rapportert verdi for Corona (som egentlig er avhengig av
-mange andre variabler).
-2. Får du et liknende oppførsel av antall friske/smittsomme/resistente
-personer som funksjon av tid, som i Washington Post-artikkelen for de
-fire scenarioene?
-3. Om du skalerer opp antallet personer (og arealet proporsjonalt), hva
-blir antallene for den totale befolkningen til et fantasi-land med for
-eksempel 100 000 innbyggere?
 
-**Del II: Simulering av antall dødsfall.**
-1. Gjenta først de fire scenarioene fra Del I, med som eneste forskjell at
-du legger til en fast sannsynlighet for at en syk individ dør av viruset.
-2. Hvor stor andel av innbyggerne i fantasi-landet dør av viruset i de fire
-scenarioene?
+# Project Goal
 
-**Del III: Effekten av alder**
-1. Det har vært klart at alder spiller en viktig rolle i hvor alvorlig effekten
-av viruset er. Vi legger derfor til alder som en parameter i modellen.
-2. Legg til en aldersfordeling av individene i simuleringen. Du kan for
-eksempel bruke kategorier 0-9 år, 10-19 år osv, og du kan velge å
-bruke data om aldersfordelingen fra et land som finnes.
-3. Legg til dødelighet som funksjon av alder i modellen.
-4. Simuler forskjellige scenarioer der mobilitet er en funksjon av alder. For
-eksempel:
-- Alle er i karantene
-- Full mobilitet
-- Alle over 70 år er i karantene (slik at de har mer begrenset
-kontakt med andre).
-- Flere scenarioer som du selv kan velge. Du kan tenke på
-effekter som tidspunktet etter der tiltak blir tatt, stengte
-barnehager/skoler/høyskoler/universiteter, isolasjon av
-personer som muligens er smittefarlige, begrensing av
-offentlige samlinger, begrenset kontakt mellom spesifikke
-aldersgrupper.
-5. Hvordan varierer andel individer som dør som funksjon av hvilke
-aldersgrupper som er i karantene?
-6. Hvordan er antall dødsfeller som funksjon av alder i de forskjellige
-scenarioene?
+### Part 1: Reproduce Washington Post simulation
 
-**Del IV: Tilbake til vanlig – scenarioer**
-I denne delen simulerer vi hva som skjer om situasjonen går tilbake til vanlig
-(uten karantene) etter en fast tid, for eksempel etter et halvt år. Etter det ser vi
-på konsekvensen av nye infeksjoner. Vi sammenlikner de forskjellige
-scenarioene som du har simulert i del III. Vi er interessert i i hvor stor grad
-befolkningen (som helhet) har blitt resistent mot spredning av viruset.
-Utgangspunktet er at, om nok personer har blitt resistente, en smittet person
-ikke fører til et stort utbrudd. Det vi sammenlikner er det totale antallet
-dødsfeller etter lang tid (inkl. forskjellige karantene-scenarioer i starten av
-simuleringen).
+1. Reproduce the results from Washington post article 
+
+   In the first scenario (free mobility), you are going to adjust the probability for a sick person comes in contact with a random healthy person. This way, every sick person in the beginning of the simulation (the exponential phase), comes in contact with 2.5 other persons, which is the reported value for Corona. 
+
+1. Do you get a similar result of antall/friske/smittsomme/resistant persons as a function of time, as in the WP article for the 4 scenarios?
+2. If you scale the number of persons and area proporsionally, what is the numbers for the total population in a "imagined land" with , e.g. 100 000 residents.
+
+### Part 2: Simulation of number of deaths
+
+- Add a probability for a diseased person to die of Corona
+
+How many of the residents (Imaginary land of 100 000 residents) will die?
+
+### Part 3: Effect of Age
+
+The effect of age has been a factor for the severeness of the disease. Therefore, we add a age parameter. 
+
+- Create a age-categories of 0-9, 10-19, 20-29... etc
+- Join fatality to a function of age in the model
+- Simulate different scenarios where mobility is a function of age. *For instance:*
+  - Everybody is quarantined
+  - Full mobility
+  - All elders (over 70 y) is quarantined
+- How does the share of individs who dies as a result of mobility differ?
+- How is number of deaths as a function of age in the different scenearios?
+
+### Part 4: Back to normal
+
+What happens when a society reverts from quaratine to normal life after a amount of time. For instance, after a half year. 
+
+- then look at consequences of new infections
+- Compare with simulations from part 3
+
+
+
+## Project requirements
+
+- Have all parts from project fulfilled
+
+
+
