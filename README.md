@@ -62,3 +62,21 @@ What happens when a society reverts from quaratine to normal life after a amount
 
 
 
+## Simulation data points
+
+#### Have been diseased:
+
+- **Incubation time -** 4 days
+- **sickness period** - 14 days
+
+
+
+## what i want to learn & use
+
+- Webpack
+- TypeScript
+- P5.js
+- Unit testing framework - 
+
+
+
