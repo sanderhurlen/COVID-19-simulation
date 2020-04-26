@@ -10,11 +10,11 @@ import Location from '../Location/Location';
  */
 
 export default abstract class Person {
-    private grid: Grid;
-    private location: Location;
+    private _field: Grid;
+    private _location: Location;
 
     private alive: boolean;
-    private age: number;
+    private _age: number;
 
     private quarantined: boolean;
 
@@ -22,16 +22,11 @@ export default abstract class Person {
      * The base class for all persons in the simulation. Needs to have a grid and location.
      * isQuarantied is an optional parameter that can be set if needed.
      */
-    constructor(
-        grid: Grid,
-        location: Location,
-        age = 0,
-        isQuarantined = false
-    ) {
-        this.grid = grid;
-        this.location = location;
-        this.age = age;
-        this.age > 0 ? (this.alive = true) : (this.alive = false);
+    constructor(field: Grid, location: Location, age = 0, isQuarantined = false) {
+        this._field = field;
+        this._location = location;
+        this._age = age;
+        this._age > 0 ? (this.alive = true) : (this.alive = false);
         this.quarantined = isQuarantined;
     }
 
@@ -48,16 +43,16 @@ export default abstract class Person {
      * This method makes the person interact if it is alive.
      */
     public do(): boolean {
-        if (this.alive) {
-            this.act();
-
-            return true;
+        if (!this.alive) {
+            this.setDead();
+            return false;
         }
-        return false;
+        this.act();
+        return true;
     }
 
-    public getAge(): number {
-        return this.age;
+    private setDead(): void {
+        this.alive = false;
     }
 
     public isAlive(): boolean {
@@ -73,7 +68,61 @@ export default abstract class Person {
         return this.quarantined;
     }
 
-    public getLocation(): Location {
-        return this.location;
+    /**
+     * Returns a list of adjacent locations of persons position
+     * @returns locations of moveable directions
+     */
+    public getAdjacentLocations(): Array<Location> {
+        return this._field.getAdjacentLocations(this.location);
+    }
+
+    public getNeighbors(): Array<Person> {
+        return this._field.getNeighbors(this.getAdjacentLocations());
+    }
+
+    public getPeopleNearby(loc: Location): Array<Person> {
+        const selected: Array<Person> = [];
+        for (let row = -1; row <= 1; row++) {
+            const currentRow = loc.X + row;
+            if (currentRow >= 0 && currentRow < this._field.width) {
+                for (let column = -1; column <= 1; column++) {
+                    const currentColumn = loc.Y + column;
+                    if (currentColumn >= 0 && currentColumn < this._field.height && (column != 0 || row != 0)) {
+                        const some = this._field.get(new Location(currentRow, currentColumn));
+                        if (some != null) selected.push(some);
+                    }
+                }
+            }
+        }
+        return selected;
+    }
+
+    public moveToRandomAdjacentLocation(): void {
+        const adjacents = this._field.getMoveableDirections(this.location);
+        const lucky = Math.floor(Math.random() * adjacents.length);
+        this.move(adjacents[lucky]);
+    }
+
+    /**
+     * Moves to the desired location.
+     * @param newLocation the location the person are moving to
+     */
+    public move(newLocation: Location): void {
+        this._field.clear(this.location);
+        this._location = newLocation;
+        this._field.place(this, newLocation);
+    }
+
+    public get location(): Location {
+        return this._location;
+    }
+
+    // TODO change to get <name>
+    public getField(): Grid {
+        return this._field;
+    }
+
+    public get age(): number {
+        return this._age;
     }
 }

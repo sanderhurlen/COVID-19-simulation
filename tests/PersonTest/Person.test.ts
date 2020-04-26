@@ -4,8 +4,9 @@ import Location from '../../src/Location/Location';
 import HealthyPerson from '../../src/Person/HealthyPerson';
 
 describe('Person', function () {
-    const p = new HealthyPerson(new Grid(100, 100), new Location(1, 1), 0);
-    const p1 = new HealthyPerson(new Grid(100, 100), new Location(1, 1), 43);
+    const grid = new Grid(3, 5);
+    const p = new HealthyPerson(grid, new Location(1, 1), 0);
+    const p1 = new HealthyPerson(grid, new Location(1, 1), 43);
     describe('#constructor() : alive', function () {
         it('should return false is age is 0 and true if > 0', function () {
             assert.equal(p.isAlive(), false);
@@ -15,7 +16,7 @@ describe('Person', function () {
             assert.equal(p1.isAlive(), true);
         });
         it('should return correct age 43 if age is 43', function () {
-            assert.equal(p1.getAge(), 43);
+            assert.equal(p1.age, 43);
         });
     });
 

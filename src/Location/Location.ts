@@ -3,18 +3,18 @@
  * @author sander hurlen
  */
 export default class Location {
-    private x: number;
-    private y: number;
+    private _x: number;
+    private _y: number;
 
     constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
     }
 
-    public X(): number {
-        return this.x;
+    public get X(): number {
+        return this._x;
     }
-    public Y(): number {
-        return this.y;
+    public get Y(): number {
+        return this._y;
     }
 }

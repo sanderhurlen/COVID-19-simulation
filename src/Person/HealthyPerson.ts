@@ -8,11 +8,13 @@ import Location from '../Location/Location';
  * @author sander hurlen
  */
 export default class HealthyPerson extends Person {
-    constructor(grid: Grid, location: Location, age?: number) {
-        super(grid, location, age);
+    constructor(field: Grid, location: Location, age?: number) {
+        super(field, location, age);
     }
 
-    act(): void {
-        console.log('Do something!');
+    public act(): void {
+        const adjacents = this.getAdjacentLocations();
+
+        this.moveToRandomAdjacentLocation();
     }
 }
