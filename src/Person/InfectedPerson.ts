@@ -41,7 +41,7 @@ export default class InfectedPerson extends Person {
         // E.G. a healthy person is at position 70, 49 on step 1
         // hp moves to 69,49 in step 2
         // Inf. person is at position 71, 49 on step 1. Tries to infect surrondings incl hp at 70, 49. But person is not there anymore
-        this.moveToRandomAdjacentLocation();
+        if (!this.isQuarantined()) this.moveToRandomAdjacentLocation();
     }
 
     /** Returns the current stage of the sickness period
@@ -81,11 +81,9 @@ export default class InfectedPerson extends Person {
     }
 
     private infect(person: Person): boolean {
-        if (!person.isQuarantined()) {
-            const infected = new InfectedPerson(person.grid, person.location, person.age);
-            this.grid.place(infected, infected.location);
-            return true;
-        }
-        return false;
+        const infected = new InfectedPerson(person.grid, person.location, person.age);
+        if (person.isQuarantined()) infected.setQuarantine(true);
+        this.grid.place(infected, infected.location);
+        return true;
     }
 }

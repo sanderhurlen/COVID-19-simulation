@@ -13,8 +13,9 @@ export default class HealthyPerson extends Person {
     }
 
     public act(): void {
-        const adjacents = this.getAdjacentLocations();
-
-        this.moveToRandomAdjacentLocation();
+        if (!this.isQuarantined()) {
+            this.getAdjacentLocations();
+            this.moveToRandomAdjacentLocation();
+        }
     }
 }

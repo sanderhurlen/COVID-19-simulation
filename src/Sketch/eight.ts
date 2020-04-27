@@ -18,12 +18,8 @@ const sketch = (p: p5) => {
 
     const BACKGROUND = 100;
 
-    const xHealthyData: Array<number> = [];
-    const xInfectedData: Array<number> = [];
-
     let lastValue = 0;
-    const sim = new Simulator(SIM_W, SIM_H);
-    const SIMULATION_AMOUNT = 200;
+    const sim = new Simulator(SIM_W, SIM_H, 'QUARANTINE-EIGHT');
     let grid = sim.simulationField;
 
     const canvas: any = document.getElementById('sim-1');
@@ -32,9 +28,17 @@ const sketch = (p: p5) => {
 
     const simulationEnded = false;
 
+    function inQuarantineMarker(person: Person): void {
+        p.stroke(0);
+        p.noFill();
+        p.square(person.location.X * RESOLUTION, person.location.Y * RESOLUTION, RESOLUTION);
+    }
+
     function drawPerson(person: Person): void {
         const x = person?.location.X;
         const y = person?.location.Y;
+
+        if (person.isQuarantined()) inQuarantineMarker(person);
 
         p.noStroke();
         p.fill(100, 100, 255);
@@ -44,6 +48,9 @@ const sketch = (p: p5) => {
     function drawSickPerson(person: Person): void {
         const x = person?.location.X;
         const y = person?.location.Y;
+
+        if (person.isQuarantined()) inQuarantineMarker(person);
+
         p.noStroke();
         p.fill(255, 0, 180);
         p.circle(x * RESOLUTION + RESOLUTION / 2, y * RESOLUTION + RESOLUTION / 2, RESOLUTION);
@@ -52,9 +59,20 @@ const sketch = (p: p5) => {
     function drawRecoveredPerson(person: Person): void {
         const x = person?.location.X;
         const y = person?.location.Y;
+
+        if (person.isQuarantined()) inQuarantineMarker(person);
+
         p.noStroke();
         p.fill(0, 255, 180);
         p.circle(x * RESOLUTION + RESOLUTION / 2, y * RESOLUTION + RESOLUTION / 2, RESOLUTION);
+    }
+
+    function drawFence(cell: Cell): void {
+        const x = cell?.location.X;
+        const y = cell?.location.Y;
+        p.noStroke();
+        p.fill(255, 255, 255);
+        p.square(x * RESOLUTION, y * RESOLUTION, RESOLUTION);
     }
 
     // TODO refactor to object instead of array (data)
@@ -70,7 +88,7 @@ const sketch = (p: p5) => {
             chart.data.datasets[1].data!.push(data[infectedDataID]);
             chart.data.datasets[2].data!.push(data[recoveredDataID]);
         }
-        console.log(data[0], data[1], data[2]);
+        console.log(data[0], data[1], data[2], data[3], data[4]);
         chart.update({ duration: 2 });
     }
 
@@ -92,6 +110,7 @@ const sketch = (p: p5) => {
         for (let i = 0; i < grid.grid.length; i++) {
             for (let j = 0; j < grid.grid[i].length; j++) {
                 const cell: Cell | null = grid.grid[i][j];
+                if (cell instanceof Cell && cell.isFence) drawFence(cell);
                 if (cell instanceof Person) {
                     if (cell instanceof InfectedPerson) {
                         if (cell.isSick()) drawSickPerson(cell);
@@ -115,14 +134,24 @@ const sketch = (p: p5) => {
     };
 
     p.draw = (): void => {
-        p.frameRate(10);
+        p.frameRate(20);
         if (sim.simulationShouldEnd() || pause) p.noLoop();
         if (sim.simulationIsAt > lastValue) {
             updateChart(sim.currentSimulationDetails());
             lastValue = sim.simulationIsAt;
         }
         p.background(BACKGROUND);
+
+        // draw fence
+        if (sim.fences.length != 0) {
+            for (const fence of sim.fences) {
+                if (fence.isFence) drawFence(fence);
+            }
+        }
+
         sim.simulate();
+
+        // draw all persons in grid
         for (const person of sim.persons) {
             if (person instanceof InfectedPerson) {
                 if (person.isSick()) {

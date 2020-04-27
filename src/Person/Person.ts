@@ -44,7 +44,10 @@ export default abstract class Person extends Cell {
             this.setDead();
             return false;
         }
+        // if (this.isQuarantined()) return false;
+
         this.act();
+
         return true;
     }
 

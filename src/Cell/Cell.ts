@@ -29,6 +29,11 @@ export default class Cell {
         }
     }
 
+    public get isFence(): boolean {
+        if (this._state == CellStates.FENCE) return true;
+        return false;
+    }
+
     public get grid(): Grid {
         return this._grid;
     }
