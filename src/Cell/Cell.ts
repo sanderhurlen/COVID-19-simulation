@@ -1,4 +1,5 @@
 import Grid from '../Grid/Grid';
+import Location from '../Location/Location';
 
 enum CellStates {
     'FREE',
@@ -7,6 +8,7 @@ enum CellStates {
 
 enum StateType {
     'FENCE',
+    'PERSON',
 }
 
 /** A cell for the simulation grid.
@@ -29,7 +31,7 @@ export default class Cell {
             this._stateType = state;
         } else {
             this._state = CellStates.FREE;
-            this._stateType = null;
+            this._stateType = StateType.PERSON;
         }
     }
 
@@ -39,5 +41,9 @@ export default class Cell {
 
     public get location(): Location {
         return this._location;
+    }
+
+    public setLocation(v: Location): void {
+        this._location = v;
     }
 }

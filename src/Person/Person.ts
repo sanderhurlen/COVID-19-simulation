@@ -1,5 +1,6 @@
 import Grid from '../Grid/Grid';
 import Location from '../Location/Location';
+import Cell from '../Cell/Cell';
 /**
  * An interface for an actor in the simulator
  * The Actor is a entity that can be stored in the grid,
@@ -9,10 +10,7 @@ import Location from '../Location/Location';
  * @author sander hurlen
  */
 
-export default abstract class Person {
-    private _field: Grid;
-    private _location: Location;
-
+export default abstract class Person extends Cell {
     private alive: boolean;
     private _age: number;
 
@@ -23,8 +21,7 @@ export default abstract class Person {
      * isQuarantied is an optional parameter that can be set if needed.
      */
     constructor(field: Grid, location: Location, age = 0, isQuarantined = false) {
-        this._field = field;
-        this._location = location;
+        super(field, location);
         this._age = age;
         this._age > 0 ? (this.alive = true) : (this.alive = false);
         this.quarantined = isQuarantined;
@@ -73,22 +70,22 @@ export default abstract class Person {
      * @returns locations of moveable directions
      */
     public getAdjacentLocations(): Array<Location> {
-        return this._field.getAdjacentLocations(this.location);
+        return this.grid.getAdjacentLocations(this.location);
     }
 
     public getNeighbors(): Array<Person> {
-        return this._field.getNeighbors(this.getAdjacentLocations());
+        return this.grid.getNeighbors(this.getAdjacentLocations());
     }
 
     public getPeopleNearby(loc: Location): Array<Person> {
         const selected: Array<Person> = [];
         for (let row = -1; row <= 1; row++) {
             const currentRow = loc.X + row;
-            if (currentRow >= 0 && currentRow < this._field.width) {
+            if (currentRow >= 0 && currentRow < this.grid.width) {
                 for (let column = -1; column <= 1; column++) {
                     const currentColumn = loc.Y + column;
-                    if (currentColumn >= 0 && currentColumn < this._field.height && (column != 0 || row != 0)) {
-                        const some = this._field.get(new Location(currentRow, currentColumn));
+                    if (currentColumn >= 0 && currentColumn < this.grid.height && (column != 0 || row != 0)) {
+                        const some = this.grid.get(new Location(currentRow, currentColumn));
                         if (some != null) selected.push(some);
                     }
                 }
@@ -98,7 +95,7 @@ export default abstract class Person {
     }
 
     public moveToRandomAdjacentLocation(): void {
-        const adjacents = this._field.getMoveableDirections(this.location);
+        const adjacents = this.grid.getMoveableDirections(this.location);
         const lucky = Math.floor(Math.random() * adjacents.length);
         this.move(adjacents[lucky]);
     }
@@ -108,18 +105,18 @@ export default abstract class Person {
      * @param newLocation the location the person are moving to
      */
     public move(newLocation: Location): void {
-        this._field.clear(this.location);
-        this._location = newLocation;
-        this._field.place(this, newLocation);
+        this.grid.clear(this.location);
+        this.setLocation(newLocation);
+        this.grid.place(this, newLocation);
     }
 
     public get location(): Location {
-        return this._location;
+        return this.location;
     }
 
     // TODO change to get <name>
     public getField(): Grid {
-        return this._field;
+        return this.grid;
     }
 
     public get age(): number {
