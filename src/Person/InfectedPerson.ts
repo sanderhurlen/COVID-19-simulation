@@ -11,25 +11,36 @@ import HealthyPerson from './HealthyPerson';
  * @author sander hurlen
  */
 export default class InfectedPerson extends Person {
-    private readonly INCUBATION_TIME = 4; // days
-    private readonly SICKNESS_PERIOD = 14; // days
+    private INCUBATION_TIME = 4; // days
+    private SICKNESS_PERIOD = 14; // days
 
-    private timeSick: number;
+    private _hourStep: number;
+    private _daysSick: number;
     private _totalInfectedPersons = 0;
 
     constructor(field: Grid, location: Location, age?: number) {
         super(field, location, age);
-        this.timeSick = 0;
+        this._daysSick = 0;
+        this._hourStep = 0;
     }
 
     public act(): void {
-        this.timeSick++;
+        this._hourStep++;
+
+        if (this._hourStep == 24) {
+            this._daysSick++;
+            this._hourStep = 0;
+        }
+
+        if (this.isSick()) {
+            this.tryInfectPeople();
+        }
+
         // const people = this.getNeighbors();
         // FIX possibly only infecting people that are at same position when person is trying
         // E.G. a healthy person is at position 70, 49 on step 1
         // hp moves to 69,49 in step 2
         // Inf. person is at position 71, 49 on step 1. Tries to infect surrondings incl hp at 70, 49. But person is not there anymore
-        this.tryInfectPeople();
         this.moveToRandomAdjacentLocation();
     }
 
@@ -41,7 +52,7 @@ export default class InfectedPerson extends Person {
      * @return info about the current stage of the disease
      */
     public isSick(): boolean {
-        return this.timeSick < this.SICKNESS_PERIOD;
+        return this._daysSick < this.SICKNESS_PERIOD;
     }
 
     public isRecovered(): boolean {
@@ -49,7 +60,7 @@ export default class InfectedPerson extends Person {
     }
 
     public get stage(): number {
-        return this.timeSick;
+        return this._daysSick;
     }
 
     /**

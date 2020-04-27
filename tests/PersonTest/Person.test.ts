@@ -35,4 +35,11 @@ describe('Person', function () {
             assert.equal(p.do(), false);
         });
     });
+
+    describe('is sick or recovered', () => {
+        it('should return true if person is sick', () => {
+            assert.equal(p1.do(), true);
+            assert.equal(p.do(), false);
+        });
+    });
 });

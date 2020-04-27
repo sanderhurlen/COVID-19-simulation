@@ -14,7 +14,7 @@ export default class Simulator {
     private infectedpersons: number;
     private recoveredpersons: number;
     private _persons: Array<Person>;
-    private days: number;
+    private hours: number;
 
     constructor(width: number, height: number) {
         let w = width;
@@ -26,7 +26,7 @@ export default class Simulator {
             h = 400;
         }
         this._simulationField = new Grid(w, h);
-        this.days = 0;
+        this.hours = 0;
         this.healthypersons = 0;
         this.infectedpersons = 0;
         this.recoveredpersons = 0;
@@ -40,8 +40,7 @@ export default class Simulator {
     }
 
     private simulateOneStep(): void {
-        this.days++;
-
+        this.hours++;
         for (let i = this._persons.length - 1; i >= 0; i--) {
             const person = this._persons[i];
             if (!person.do()) {
@@ -69,7 +68,7 @@ export default class Simulator {
     }
 
     private reset(): void {
-        this.days = 0;
+        this.hours = 0;
         this.healthypersons = 0;
         this.infectedpersons = 0;
         this.recoveredpersons = 0;
@@ -86,7 +85,7 @@ export default class Simulator {
 
         while (occupiedLocations < this.START_AMOUNT_HEALTHY && loopRestriction < 10000) {
             const posX = Math.floor(Math.random() * this._simulationField.width);
-            const posY = Math.floor(Math.random() * this._simulationField.width);
+            const posY = Math.floor(Math.random() * this._simulationField.height);
             const tryLocation = new Location(posX, posY);
 
             if (!this._simulationField.isOccupied(tryLocation)) {
@@ -121,7 +120,7 @@ export default class Simulator {
      * @returns [healthy people, infected people]
      */
     public currentSimulationDetails(): Array<number> {
-        return [this.days, this.healthypersons, this.infectedpersons, this.recoveredpersons];
+        return [Math.floor(this.hours / 24), this.healthypersons, this.infectedpersons, this.recoveredpersons];
     }
 
     public get simulationField(): Grid {
@@ -132,8 +131,11 @@ export default class Simulator {
         return this._persons;
     }
 
+    /** Returns the current day the simulation is at.
+     * @return days since the simulation started
+     */
     public get simulationIsAt(): number {
-        return this.days;
+        return Math.floor(this.hours / 24);
     }
 
     public simulationShouldEnd(): boolean {
