@@ -1,5 +1,6 @@
 import Person from '../Person/Person';
 import Location from '../Location/Location';
+import Cell, { CellStates } from '../Cell/Cell';
 
 /**
  * Creates a grid to simulate on
@@ -12,7 +13,7 @@ export default class Grid {
     public readonly width: number;
     public readonly height: number;
 
-    private _grid: Array<Array<Person | null>>;
+    private _grid: Array<Array<Cell | null>>;
 
     constructor(w: number, h: number) {
         this.width = w;
@@ -21,8 +22,8 @@ export default class Grid {
         this._grid = this.create(w, h);
     }
 
-    private create(rows: number, cols: number): Array<Array<Person | null>> {
-        const temp: Array<Array<Person | null>> = [];
+    private create(rows: number, cols: number): Array<Array<Cell | null>> {
+        const temp: Array<Array<Cell | null>> = [];
         for (let i = 0; i < rows; i++) {
             temp[i] = [];
             for (let j = 0; j < cols; j++) {
@@ -43,11 +44,31 @@ export default class Grid {
         return dirs;
     }
 
+    public getAllAdjacentLocations(loc: Location): Array<Person> {
+        const selected = new Array<Person>();
+        for (let row = -1; row <= 1; row++) {
+            const currentRow = loc.X + row;
+            if (currentRow >= 0 && currentRow < this.width) {
+                for (let column = -1; column <= 1; column++) {
+                    const currentColumn = loc.Y + column;
+                    if (currentColumn >= 0 && currentColumn < this.height && (column != 0 || row != 0)) {
+                        // const some = this.get(new Location(currentRow, currentColumn));
+                        const some = this.grid[currentRow][currentColumn];
+                        console.log(some);
+
+                        // if (some instanceof Person) selected.push(some);
+                    }
+                }
+            }
+        }
+        return selected;
+    }
+
     public getNeighbors(locations: Array<Location>): Array<Person> {
         const people: Array<Person> = [];
         locations.forEach((value) => {
             const some = this.get(value);
-            if (some != null) people.push(some);
+            if (some instanceof Person) people.push(some);
         });
         return people;
     }
@@ -65,29 +86,28 @@ export default class Grid {
         return dirs;
     }
 
-    public add(person: Person): Person | null {
-        this._grid[person.location.X][person.location.Y] = person;
-        return this._grid[person.location.X][person.location.Y];
+    public add(cell: Cell): void {
+        this.grid[cell.location.X][cell.location.Y] = cell;
     }
 
-    public get(loc: Location): Person | null {
-        return this._grid[loc.X][loc.Y];
+    public get(loc: Location): Cell | null {
+        return this.grid[loc.X][loc.Y];
     }
 
     public place(person: Person, location: Location): void {
         this.clear(location);
-        this._grid[location.X][location.Y] = person;
+        this.add(person);
     }
 
     public clear(location: Location): void {
-        this._grid[location.X][location.Y] = null;
+        this.grid[location.X][location.Y] = null;
     }
 
     public isOccupied(loc: Location): boolean {
-        return this._grid[loc.X][loc.Y] != null;
+        return this.grid[loc.X][loc.Y] != null;
     }
 
-    public get grid(): Array<Array<Person | null>> {
+    public get grid(): Array<Array<Cell | null>> {
         return this._grid;
     }
 }

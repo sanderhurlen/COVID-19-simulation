@@ -81,9 +81,8 @@ export default class Simulator {
     private populate(): void {
         let occupiedLocations = 0;
         let loopRestriction = 0;
-        this.placeInfectedPerson();
 
-        while (occupiedLocations < this.START_AMOUNT_HEALTHY && loopRestriction < 10000) {
+        while (occupiedLocations < this.AMOUNT_OF_PERSONS && loopRestriction < 10000) {
             const posX = Math.floor(Math.random() * this._simulationField.width);
             const posY = Math.floor(Math.random() * this._simulationField.height);
             const tryLocation = new Location(posX, posY);
@@ -100,18 +99,20 @@ export default class Simulator {
 
             loopRestriction++;
         }
+        this.pickInfectedPerson(); // ! TODO refactor to pick existing
     }
 
     // TODO change the way we do it later
-    private placeInfectedPerson(): void {
-        const loc = new Location(
-            Math.floor(Math.random() * this._simulationField.width),
-            Math.floor(Math.random() * this._simulationField.height),
-        );
-        const p = new InfectedPerson(this._simulationField, loc, Math.floor(Math.random() * 10));
-        this._simulationField.add(p);
-        this.infectedpersons++;
-        this._persons.push(p);
+    private pickInfectedPerson(): void {
+        const rnd = Math.floor(Math.random() * this._persons.length);
+        const randomPerson = this._persons[rnd];
+        if (randomPerson instanceof HealthyPerson && randomPerson != null) {
+            const p = new InfectedPerson(this._simulationField, randomPerson.location, Math.floor(Math.random() * 10));
+            this._persons.splice(rnd, 1, p);
+            this._simulationField.add(p);
+            this.infectedpersons++;
+            this.healthypersons--;
+        }
     }
 
     /**

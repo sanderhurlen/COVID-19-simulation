@@ -5,6 +5,7 @@ import Simulator from '../Simulator/Simulator';
 import InfectedPerson from '../Person/InfectedPerson';
 import Person from '../Person/Person';
 import HealthyPerson from '../Person/HealthyPerson';
+import Cell from '../Cell/Cell';
 
 const sketch = (p: p5) => {
     let start = false;
@@ -90,12 +91,14 @@ const sketch = (p: p5) => {
         p.background(BACKGROUND);
         for (let i = 0; i < grid.grid.length; i++) {
             for (let j = 0; j < grid.grid[i].length; j++) {
-                const person: Person | null = grid.grid[i][j];
-                if (person instanceof InfectedPerson) {
-                    if (person.isSick()) drawSickPerson(person);
-                }
-                if (person instanceof HealthyPerson) {
-                    drawPerson(person);
+                const cell: Cell | null = grid.grid[i][j];
+                if (cell instanceof Person) {
+                    if (cell instanceof InfectedPerson) {
+                        if (cell.isSick()) drawSickPerson(cell);
+                    }
+                    if (cell instanceof HealthyPerson) {
+                        drawPerson(cell);
+                    }
                 }
             }
         }
@@ -114,7 +117,6 @@ const sketch = (p: p5) => {
             updateChart(sim.currentSimulationDetails());
             lastValue = sim.simulationIsAt;
         }
-
         p.background(BACKGROUND);
         sim.simulate();
         for (const person of sim.persons) {

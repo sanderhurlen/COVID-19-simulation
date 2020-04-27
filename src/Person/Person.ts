@@ -78,19 +78,8 @@ export default abstract class Person extends Cell {
     }
 
     public getPeopleNearby(loc: Location): Array<Person> {
-        const selected: Array<Person> = [];
-        for (let row = -1; row <= 1; row++) {
-            const currentRow = loc.X + row;
-            if (currentRow >= 0 && currentRow < this.grid.width) {
-                for (let column = -1; column <= 1; column++) {
-                    const currentColumn = loc.Y + column;
-                    if (currentColumn >= 0 && currentColumn < this.grid.height && (column != 0 || row != 0)) {
-                        const some = this.grid.get(new Location(currentRow, currentColumn));
-                        if (some != null) selected.push(some);
-                    }
-                }
-            }
-        }
+        let selected: Array<Person> = [];
+        selected = this.grid.getAllAdjacentLocations(loc);
         return selected;
     }
 
@@ -108,15 +97,6 @@ export default abstract class Person extends Cell {
         this.grid.clear(this.location);
         this.setLocation(newLocation);
         this.grid.place(this, newLocation);
-    }
-
-    public get location(): Location {
-        return this.location;
-    }
-
-    // TODO change to get <name>
-    public getField(): Grid {
-        return this.grid;
     }
 
     public get age(): number {

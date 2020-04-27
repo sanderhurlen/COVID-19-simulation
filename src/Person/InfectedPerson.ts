@@ -69,10 +69,11 @@ export default class InfectedPerson extends Person {
      * @param neighbors to possibly infect
      */
     private tryInfectPeople(): void {
-        const neighbors = this.getPeopleNearby(this.location);
+        const neighbors = this.getAdjacentLocations();
         for (const neighbor of neighbors) {
-            if (neighbor instanceof HealthyPerson) {
-                if (this.infect(neighbor)) {
+            const test = this.grid.get(neighbor);
+            if (test instanceof HealthyPerson) {
+                if (this.infect(test)) {
                     this._totalInfectedPersons++;
                 }
             }
@@ -81,8 +82,8 @@ export default class InfectedPerson extends Person {
 
     private infect(person: Person): boolean {
         if (!person.isQuarantined()) {
-            const infected = new InfectedPerson(person.getField(), person.location, person.age);
-            this.getField().place(infected, infected.location);
+            const infected = new InfectedPerson(person.grid, person.location, person.age);
+            this.grid.place(infected, infected.location);
             return true;
         }
         return false;

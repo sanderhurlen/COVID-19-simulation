@@ -1,13 +1,10 @@
 import Grid from '../Grid/Grid';
 import Location from '../Location/Location';
 
-enum CellStates {
+export enum CellStates {
     'FREE',
-    'BLOCKED',
-}
-
-enum StateType {
     'FENCE',
+    'BLOCKED',
     'PERSON',
 }
 
@@ -20,18 +17,15 @@ export default class Cell {
     private _location: Location;
 
     private _state: CellStates;
-    private _stateType: StateType | null;
 
-    constructor(grid: Grid, location: Location, state?: StateType) {
+    constructor(grid: Grid, location: Location, state?: CellStates) {
         this._grid = grid;
         this._location = location;
 
         if (state != null) {
-            this._state = CellStates.BLOCKED;
-            this._stateType = state;
+            this._state = state;
         } else {
             this._state = CellStates.FREE;
-            this._stateType = StateType.PERSON;
         }
     }
 
