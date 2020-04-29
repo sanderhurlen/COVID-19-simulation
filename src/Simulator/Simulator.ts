@@ -4,6 +4,8 @@ import HealthyPerson from '../Person/HealthyPerson';
 import Location from '../Location/Location';
 import InfectedPerson from '../Person/InfectedPerson';
 import Cell, { CellStates } from '../Cell/Cell';
+import { selectAgeFromDistribution } from '../Person/PersonAgeStats';
+import { getRandomInt } from '../helper/random';
 
 export default class Simulator {
     private readonly AMOUNT_OF_PERSONS = 200;
@@ -133,7 +135,8 @@ export default class Simulator {
             const tryLocation = new Location(posX, posY);
 
             if (!this._simulationField.isOccupied(tryLocation)) {
-                const age = Math.floor(Math.random() * 92 + 1); // TODO add a max age variable?
+                const pa = selectAgeFromDistribution();
+                const age = getRandomInt(pa.minAge, pa.maxAge);
                 const addPerson = new HealthyPerson(this._simulationField, tryLocation, age);
 
                 if (this.SCENEARIO === 'QUARANTINE-QUARTER') this.applyQuarantine(this.THREE_QUARTER_FREE);
