@@ -2,6 +2,7 @@ import Person from './Person';
 import Location from '../Location/Location';
 import Grid from '../Grid/Grid';
 import HealthyPerson from './HealthyPerson';
+import { defaultMortality } from './PersonAgeStats';
 
 /**
  * A infected person is a person that has been infected,
@@ -14,24 +15,15 @@ export default class InfectedPerson extends Person {
     private INCUBATION_TIME = 4; // days
     private SICKNESS_PERIOD = 14; // days
 
-    private _hourStep: number;
     private _daysSick: number;
     private _totalInfectedPersons = 0;
 
     constructor(field: Grid, location: Location, age?: number) {
         super(field, location, age);
         this._daysSick = 0;
-        this._hourStep = 0;
     }
 
     public act(): void {
-        this._hourStep++;
-
-        if (this._hourStep == 24) {
-            this._daysSick++;
-            this._hourStep = 0;
-        }
-
         if (this.isSick()) {
             this.tryInfectPeople();
         }
@@ -42,6 +34,29 @@ export default class InfectedPerson extends Person {
         // hp moves to 69,49 in step 2
         // Inf. person is at position 71, 49 on step 1. Tries to infect surrondings incl hp at 70, 49. But person is not there anymore
         if (!this.isQuarantined()) this.moveToRandomAdjacentLocation();
+    }
+
+    /** Implements abstract method from Person class.
+     * This function is triggered on every new day.
+     */
+    public onNewDay(): void {
+        this._daysSick++;
+    }
+
+    /** Implements the abstract method given by Person class.
+     * - See documentation on Person class
+     * Comments:
+     * - A infected person, that is sick (not recovered), has the mortality given by age group, if age and deaths is allowed.
+     * - A infected person, that is recovered has normal mortality, given by the default value
+     */
+    public testMortality(ageIsAllowed: boolean): boolean {
+        if (this.isSick() && ageIsAllowed) {
+            if (Math.random() <= this.mortality) return true;
+        } else {
+            if (Math.random() <= defaultMortality) return true;
+        }
+
+        return false;
     }
 
     /** Returns the current stage of the sickness period

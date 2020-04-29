@@ -18,6 +18,12 @@ export default abstract class Person extends Cell {
     private alive: boolean;
     private quarantined: boolean;
 
+    private deathIsAllowed: boolean;
+    private ageIsAllowed: boolean;
+
+    private _days: number;
+    private _hours: number;
+
     /** Constructs a Person object that can be refered to from the simulation
      * The base class for all persons in the simulation. Needs to have a grid and location.
      * isQuarantied is an optional parameter that can be set if needed.
@@ -27,7 +33,15 @@ export default abstract class Person extends Cell {
         this._age = age;
         this._ageMortality = this.calculateMortalityOfAgeGroup();
 
-        this._age > 0 ? (this.alive = true) : (this.alive = false);
+        // ? TODO maybe this should be passed in as parameters to do()?
+        this._days = 0;
+        this._hours = 0;
+        // TOD0-END
+
+        this.deathIsAllowed = false;
+        this.ageIsAllowed = false;
+
+        this._age >= 0 ? (this.alive = true) : (this.alive = false);
         this.quarantined = isQuarantined;
     }
 
@@ -44,16 +58,63 @@ export default abstract class Person extends Cell {
      * This method makes the person interact if it is alive.
      */
     public do(): boolean {
+        this._hours++;
+
+        if (this._hours == 24 && this.alive) {
+            this.incrementDay();
+            this._hours = 0;
+
+            if (this._days == 3) {
+                this.incrementAge();
+                this._days = 0;
+            }
+        }
+
         if (!this.alive) {
             this.setDead();
             return false;
         }
-        // if (this.isQuarantined()) return false;
 
         this.act();
 
         return true;
     }
+
+    /**
+     * increments the age of the person.
+     * When person is aging and approaching a new decade, the mortality changes to the new age group.
+     * Every birthday, the person is also tested for their mortality. If the person dies
+     */
+    public incrementAge(): void {
+        this._age++;
+        if (this._age % 10 == 0) {
+            this._ageMortality = this.calculateMortalityOfAgeGroup();
+        }
+
+        if (this.deathIsAllowed) {
+            this.alive = this.testMortality(this.ageIsAllowed);
+        }
+    }
+
+    private incrementDay(): void {
+        this._days++;
+        this.onNewDay();
+    }
+
+    /** a trivial abstract method for a class that is extending the person to apply something
+     *  that is happening every day. For example a sick person
+     * may increment the count of days sick... */
+    public abstract onNewDay(): void;
+
+    /**
+     * Implement this method to test the mortality of the person.
+     * Should return true if person died of their mortality probability or false if not.
+     * A healthy person is not affected by the different probability of mortality unless it becomes infected.
+     * This means a infected person is more likely to die because of a higher mortality.
+     *
+     * @param ageAllowed pass the value of if age is allowed in the simulation
+     */
+    public abstract testMortality(ageAllowed: boolean): boolean;
 
     private setDead(): void {
         this.alive = false;
@@ -87,17 +148,6 @@ export default abstract class Person extends Cell {
         if (this._ageMortality === -1) throw new Error('Mortality is not assigned to a simulation value');
 
         return this._ageMortality;
-    }
-
-    /**
-     * increments the age of the person.
-     * When the person is aging and approaching a new decade, the mortality changes to the new age group
-     */
-    public incrementAge(): void {
-        this._age++;
-        if (this._age % 10 == 0) {
-            this._ageMortality = this.calculateMortalityOfAgeGroup();
-        }
     }
 
     /**

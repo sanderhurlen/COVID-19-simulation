@@ -18,4 +18,13 @@ export default class HealthyPerson extends Person {
             this.moveToRandomAdjacentLocation();
         }
     }
+
+    public testMortality(): boolean {
+        // if person suddenly dies, return true
+        if (Math.random() <= this.mortality) return true;
+
+        return false;
+    }
+
+    public onNewDay(): void {}
 }
