@@ -6,6 +6,7 @@ import InfectedPerson from '../Person/InfectedPerson';
 import Cell, { CellStates } from '../Cell/Cell';
 import { selectAgeFromDistribution } from '../Person/PersonAgeStats';
 import { getRandomInt } from '../helper/random';
+import SimulationStats from '../helper/SimulationStats';
 
 export default class Simulator {
     private readonly AMOUNT_OF_PERSONS = 200;
@@ -27,10 +28,13 @@ export default class Simulator {
     private timeAtReset: number;
 
     private _simulationField: Grid;
+    // TODO redo this to one object of stats
     private healthypersons: number;
     private infectedpersons: number;
     private recoveredpersons: number;
     private inQuarantine: number;
+    private dead: number;
+    // ENDTODO
     private _persons: Array<Person>;
     private hours: number;
 
@@ -55,6 +59,7 @@ export default class Simulator {
         this.infectedpersons = 0;
         this.recoveredpersons = 0;
         this.inQuarantine = 0;
+        this.dead = 0;
         this._persons = [];
         this._fences = [];
 
@@ -92,13 +97,15 @@ export default class Simulator {
         this.healthypersons = 0;
         this.infectedpersons = 0;
         this.recoveredpersons = 0;
+        this.dead = 0;
         const temp = new Array<Person>();
         for (const row in this._simulationField.grid) {
             for (const col of this._simulationField.grid[row]) {
                 if (col instanceof Person) temp.push(col);
+                if (col instanceof Person && !col.isAlive()) this.dead++;
                 if (col instanceof HealthyPerson) this.healthypersons++;
-                if (col instanceof InfectedPerson && col.isSick()) this.infectedpersons++;
                 if (col instanceof InfectedPerson && col.isRecovered()) this.recoveredpersons++;
+                if (col instanceof InfectedPerson && col.isSick()) this.infectedpersons++;
             }
         }
         return temp;
@@ -215,17 +222,17 @@ export default class Simulator {
 
     /**
      * Returns an array of numbers with number of healthy persons and number of infected persons
-     * TODO refactor to include number of dead
      * @returns [healthy people, infected people]
      */
-    public currentSimulationDetails(): Array<number> {
-        return [
-            Math.floor(this.hours / 24),
-            this.healthypersons,
-            this.infectedpersons,
-            this.recoveredpersons,
-            this.inQuarantine,
-        ];
+    public currentSimulationDetails(): SimulationStats {
+        return {
+            day: Math.floor(this.hours / 24),
+            suceptible: this.healthypersons,
+            infected: this.infectedpersons,
+            recovered: this.recoveredpersons,
+            inQuarantine: this.inQuarantine,
+            dead: this.dead,
+        };
     }
 
     public get simulationField(): Grid {
