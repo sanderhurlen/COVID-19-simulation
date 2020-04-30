@@ -87,7 +87,7 @@ export default class InfectedPerson extends Person {
         const neighbors = this.getAdjacentLocations();
         for (const neighbor of neighbors) {
             const test = this.grid.get(neighbor);
-            if (test instanceof HealthyPerson) {
+            if (test instanceof HealthyPerson && test.isAlive()) {
                 if (this.infect(test)) {
                     this._totalInfectedPersons++;
                 }

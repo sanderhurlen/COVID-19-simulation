@@ -31,6 +31,7 @@ const standard = {
         ],
     },
     options: {
+        maintainAspectRatio: true,
         responsive: true,
         scales: {
             yAxes: [

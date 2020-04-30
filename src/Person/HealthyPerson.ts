@@ -21,9 +21,9 @@ export default class HealthyPerson extends Person {
 
     public testMortality(): boolean {
         // if person suddenly dies, return true
-        if (Math.random() <= this.mortality) return true;
+        if (Math.random() <= this.mortality) return false;
 
-        return false;
+        return true;
     }
 
     public onNewDay(): void {}

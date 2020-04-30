@@ -7,14 +7,19 @@ import Cell, { CellStates } from '../Cell/Cell';
 import { selectAgeFromDistribution } from '../Person/PersonAgeStats';
 import { getRandomInt } from '../helper/random';
 import SimulationStats from '../helper/SimulationStats';
+import p5 from 'p5';
+import { Chart } from 'chart.js';
+import { standard } from '../Chart/Config';
+import { SimulationColors } from '../helper/SimulationColors';
+import SimConfig from '../helper/SimConfig';
+import SimScenearios from '../helper/SimScenearios';
 
 export default class Simulator {
     private readonly AMOUNT_OF_PERSONS = 200;
     private readonly START_AMOUNT_INFECTED = 1;
     private readonly START_AMOUNT_HEALTHY = this.AMOUNT_OF_PERSONS - this.START_AMOUNT_INFECTED;
 
-    // Sceneario quarantine fence : simulation 2
-    private SCENEARIO = '';
+    private SCENEARIO: SimScenearios;
     private readonly QUARANTINE_FENCE_ATX = 15;
     private readonly QUARANTINE_FENCE_INTERVAL = 8; // sec
     private _fences: Array<Cell>;
@@ -38,7 +43,12 @@ export default class Simulator {
     private _persons: Array<Person>;
     private hours: number;
 
-    constructor(width: number, height: number, sceneario?: string) {
+    private ageIsEnabled: boolean;
+    private deathIsEnabled: boolean;
+
+    private _p5: p5 | undefined;
+
+    constructor(width: number, height: number, config: SimConfig) {
         let w = width;
         let h = height;
         if (width <= 0 && height <= 0) {
@@ -51,7 +61,10 @@ export default class Simulator {
         this.hours = 0;
         this.timeAtReset = 0;
         this.currentTime = 0;
-        if (sceneario) this.SCENEARIO = sceneario;
+        this.SCENEARIO = config.sceneario;
+
+        this.ageIsEnabled = false;
+        this.deathIsEnabled = false;
 
         this.numOfTimes = 0;
 
@@ -64,6 +77,134 @@ export default class Simulator {
         this._fences = [];
 
         this.reset();
+
+        this.initialize(config.canvas);
+    }
+
+    private initialize(node: HTMLElement | undefined): void {
+        const sketch = (p: p5): any => {
+            const SIM_H = 40;
+            const SIM_W = 60;
+            const RESOLUTION = 6;
+            const SPACE = 3;
+            const POINT_POS = RESOLUTION;
+            const POINT_CENTER = POINT_POS / 2;
+            const CANVAS_HEIGHT = SIM_H * POINT_POS;
+            const CANVAS_WIDTH = SIM_W * POINT_POS;
+
+            let lastValue = 0;
+            let grid = this.simulationField;
+
+            const canvas: any = document.getElementById('sim-1');
+            const ctx = canvas.getContext('2d');
+            let chart: Chart = new Chart(ctx, standard);
+
+            function inQuarantineMarker(person: Person): void {
+                p.strokeWeight(2);
+                p.stroke(SimulationColors.QUARANTINE);
+                p.noFill();
+                p.rectMode('center');
+                p.square(person.location.X * RESOLUTION + SPACE, person.location.Y * RESOLUTION + SPACE, RESOLUTION);
+            }
+
+            function drawPerson(person: Person): void {
+                const x = person?.location.X;
+                const y = person?.location.Y;
+                let color = '#ffffff';
+
+                if (person.isAlive()) {
+                    if (person instanceof InfectedPerson) {
+                        if (person.isSick()) {
+                            color = SimulationColors.INFECTED;
+                        } else {
+                            color = SimulationColors.RECOVERED;
+                        }
+                    }
+                    if (person instanceof HealthyPerson) {
+                        color = SimulationColors.SUSCEPTIBLE;
+                    }
+                } else {
+                    color = SimulationColors.DEAD;
+                }
+
+                p.stroke(color);
+                p.strokeWeight(5);
+                p.point(x * RESOLUTION + POINT_CENTER, y * RESOLUTION + POINT_CENTER);
+                if (person.isQuarantined()) inQuarantineMarker(person);
+            }
+
+            function drawFence(cell: Cell): void {
+                const x = cell?.location.X;
+                const y = cell?.location.Y;
+                p.noStroke();
+                p.fill(SimulationColors.FENCE);
+                p.rectMode('center');
+                p.square(x * RESOLUTION + SPACE, y * RESOLUTION + SPACE, RESOLUTION);
+            }
+
+            function updateChart(data: SimulationStats): void {
+                chart.data.labels!.push(data.day);
+                if (chart.data.datasets) {
+                    chart.data.datasets[0].data!.push(data.suceptible);
+                    chart.data.datasets[1].data!.push(data.infected);
+                    chart.data.datasets[2].data!.push(data.recovered);
+                }
+                console.log(data);
+                chart.update({ duration: 2 });
+            }
+
+            function renderChart(data: SimulationStats): void {
+                const canvas: any = document.getElementById('sim-1');
+                const ctx = canvas.getContext('2d');
+
+                chart = new Chart(ctx, standard);
+                const c = document.getElementById('sim-1');
+                c?.setAttribute('style', `width: ${600}px`);
+                updateChart(data);
+            }
+
+            p.setup = (): void => {
+                lastValue = this.simulationIsAt;
+                p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+                grid = this.simulationField;
+                p.background(SimulationColors.CANVAS_BACKGROUND);
+                for (let i = 0; i < grid.grid.length; i++) {
+                    for (let j = 0; j < grid.grid[i].length; j++) {
+                        const cell: Cell | null = grid.grid[i][j];
+                        if (cell instanceof Cell && cell.isFence) drawFence(cell);
+                        if (cell instanceof Person) drawPerson(cell);
+                    }
+                }
+                renderChart(this.currentSimulationDetails());
+                p.noLoop();
+            };
+
+            p.draw = (): void => {
+                p.frameRate(20);
+                if (this.simulationShouldEnd()) p.noLoop();
+                if (this.simulationIsAt > lastValue) {
+                    updateChart(this.currentSimulationDetails());
+                    lastValue = this.simulationIsAt;
+                }
+                p.background(SimulationColors.CANVAS_BACKGROUND);
+
+                // draw fence
+                if (this.fences.length != 0) {
+                    for (const fence of this.fences) {
+                        if (fence.isFence) drawFence(fence);
+                    }
+                }
+
+                this.simulate();
+
+                // draw all persons in grid
+                for (const person of this.persons) {
+                    drawPerson(person);
+                }
+            };
+        };
+
+        this._p5 = new p5(sketch, node);
     }
 
     public simulate(): void {
@@ -85,9 +226,7 @@ export default class Simulator {
 
         for (let i = this._persons.length - 1; i >= 0; i--) {
             const person = this._persons[i];
-            if (!person.do()) {
-                this._persons.splice(i, 1);
-            }
+            person.do();
         }
         this._persons = this.updateStats();
     }
@@ -111,7 +250,32 @@ export default class Simulator {
         return temp;
     }
 
+    public start(): void {
+        this._p5?.loop();
+    }
+
+    public pause(): void {
+        this._p5?.noLoop();
+    }
+
+    public restart(): void {
+        this.reset();
+        this.pause();
+        this._p5?.draw();
+    }
+
+    public enableAge(v: boolean): void {
+        this.ageIsEnabled = v;
+        this.restart();
+    }
+
+    public enableMortality(v: boolean): void {
+        this.deathIsEnabled = v;
+        this.restart();
+    }
+
     private reset(): void {
+        this._simulationField = new Grid(60, 40);
         this.hours = 0;
         this.timeAtReset = new Date().getSeconds();
 
@@ -132,7 +296,7 @@ export default class Simulator {
         let occupiedLocations = 0;
         let loopRestriction = 0;
 
-        if (this.SCENEARIO === 'QUARANTINE-FENCE') this.applyQuarantineFence();
+        if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) this.applyQuarantineFence();
 
         this.pickInfectedPerson();
 
@@ -146,8 +310,11 @@ export default class Simulator {
                 const age = getRandomInt(pa.minAge, pa.maxAge);
                 const addPerson = new HealthyPerson(this._simulationField, tryLocation, age);
 
-                if (this.SCENEARIO === 'QUARANTINE-QUARTER') this.applyQuarantine(this.THREE_QUARTER_FREE);
-                if (this.SCENEARIO === 'QUARANTINE-EIGHT') this.applyQuarantine(this.ONE_IN_EIGHT_FREE);
+                addPerson.enableAgeOption(this.ageIsEnabled);
+                addPerson.enableDeathOption(this.deathIsEnabled);
+
+                if (this.SCENEARIO === SimScenearios.QUARANTINE_QUARTER) this.applyQuarantine(this.THREE_QUARTER_FREE);
+                if (this.SCENEARIO === SimScenearios.QUARANTINE_EIGHT) this.applyQuarantine(this.ONE_IN_EIGHT_FREE);
 
                 this._persons.push(addPerson);
                 this._simulationField.add(addPerson);
@@ -205,7 +372,7 @@ export default class Simulator {
         let rnd = 0;
         let x = 0;
         let y = 0;
-        if (this.SCENEARIO === 'QUARANTINE-FENCE') {
+        if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) {
             rnd = Math.floor(Math.random() * this.QUARANTINE_FENCE_ATX);
             x = rnd;
         } else {

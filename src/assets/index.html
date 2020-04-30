@@ -16,11 +16,35 @@
             padding: 0;
         }
     </style>
+    <label for="age-checkbox">Enable Age</label>
+    <input type="checkbox" name="Enable Age" id="age-checkbox" checked="">
+    <label for="death-checkbox">Enable Death</label>
+    <input type="checkbox" name="Enable Death" id="death-checkbox" checked="">
 
     <h1>Welcome</h1>
     <h3>Graph</h3>
     <canvas id="sim-1"></canvas>
     <h4>Simulation</h4>
+
+    <button type="submit" id="FFA-start">Start</button>
+    <button type="submit" id="FFA-pause">Pause</button>
+    <button type="reset" id="FFA-restart">Restart</button>
+    <div id="free-for-all"></div>
+
+    <button type="submit" id="FQ-start">Start</button>
+    <button type="submit" id="FQ-pause">Pause</button>
+    <button type="reset" id="FQ-restart">Restart</button>
+    <div id="forced-quarantine"></div>
+
+    <button type="submit" id="OQ-start">Start</button>
+    <button type="submit" id="OQ-pause">Pause</button>
+    <button type="reset" id="OQ-restart">Restart</button>
+    <div id="one-quarter-free"></div>
+
+    <button type="submit" id="OE-start">Start</button>
+    <button type="submit" id="OE-pause">Pause</button>
+    <button type="reset" id="OE-restart">Restart</button>
+    <div id="one-eight-free"></div>
 </body>
 
 </html>

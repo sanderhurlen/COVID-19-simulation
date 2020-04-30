@@ -58,26 +58,26 @@ export default abstract class Person extends Cell {
      * This method makes the person interact if it is alive.
      */
     public do(): boolean {
-        this._hours++;
+        if (this.alive) {
+            this._hours++;
 
-        if (this._hours == 24 && this.alive) {
-            this.incrementDay();
-            this._hours = 0;
+            if (this._hours == 24 && this.alive) {
+                this.incrementDay();
+                this._hours = 0;
 
-            if (this._days == 3) {
-                this.incrementAge();
-                this._days = 0;
+                if (this._days == 3) {
+                    this.incrementAge();
+                    this._days = 0;
+                }
             }
-        }
 
-        if (!this.alive) {
+            this.act();
+
+            return true;
+        } else {
             this.setDead();
             return false;
         }
-
-        this.act();
-
-        return true;
     }
 
     /**
@@ -92,6 +92,8 @@ export default abstract class Person extends Cell {
         }
 
         if (this.deathIsAllowed) {
+            console.log('is tried to kill');
+
             this.alive = this.testMortality(this.ageIsAllowed);
         }
     }
@@ -139,6 +141,14 @@ export default abstract class Person extends Cell {
         return this._age;
     }
 
+    public enableAgeOption(v: boolean): void {
+        this.ageIsAllowed = v;
+    }
+
+    public enableDeathOption(v: boolean): void {
+        this.deathIsAllowed = v;
+    }
+
     /**
      * Returns the given mortatlity for the persons age group.
      * This value is updated at every single enter of a new decade
@@ -158,7 +168,7 @@ export default abstract class Person extends Cell {
         let mortality = defaultMortality; // set default value from './PersonAgeStats'
         let index = 0;
         let found = false;
-        while (index < ageMortalities.length && !found) {
+        while (index < ageMortalities.length && !found && this.ageIsAllowed) {
             const mg = ageMortalities[index];
 
             if (this._age >= mg.age) {
