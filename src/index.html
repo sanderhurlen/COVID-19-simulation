@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+
+    <link rel="stylesheet" href="assets/app.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
+
+<body>
+
+
+    <nav class="level">
+        <p class="level-item has-text-centered">
+            <a class="link is-info">About</a>
+        </p>
+        <p class="level-item has-text-centered">
+            <img src="https://bulma.io/images/bulma-type.png" alt="" style="height: 30px;">
+        </p>
+        <p class="level-item has-text-centered">
+            <label for="age-checkbox" class="checkbox">
+                <input type="checkbox" name="Enable Age" id="age-checkbox" checked="" />
+                Enable Age
+            </label>
+        </p>
+        <p class="level-item has-text-centered">
+            <label for="death-checkbox" class="checkbox">
+                <input type="checkbox" name="Enable Death" id="death-checkbox" checked="" />
+                Enable Death
+            </label>
+        </p>
+    </nav>
+    <section class="section">
+        <h1 class="title is-1">About the project</h1>
+        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus exercitationem nobis tempora officiis
+            totam doloremque sunt voluptatem assumenda, expedita iusto temporibus porro corporis ab dicta distinctio
+            iure corrupti blanditiis consequatur.
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae modi dolor excepturi obcaecati iusto. Quod
+            omnis, labore obcaecati enim culpa aperiam dolor harum esse minima ex pariatur tenetur error sunt.
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, expedita. Odit, obcaecati dicta quos eius
+            explicabo, voluptatem, ab ratione animi cupiditate asperiores recusandae eum rerum. Eius quae id molestias
+            voluptate. Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis voluptatum dolores a delectus,
+            reiciendis alias distinctio veritatis doloremque libero, necessitatibus iure sit possimus eos? Blanditiis
+            explicabo odio reiciendis quos eos.
+        </p>
+    </section>
+
+
+    <div class="columns">
+        <div class="column is-half">
+            <section class="section" id="left">
+                <h2 class="title is-2">Stats</h2>
+                <canvas id="sim-1"></canvas>
+                <nav class="level">
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading">Suceptible</p>
+                            <p class="title" id="suceptible">199</p>
+                        </div>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading">Infected</p>
+                            <p class="title" id="infected">1</p>
+                        </div>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading">Recovered</p>
+                            <p class="title" id="recovered">0</p>
+                        </div>
+                    </div>
+                    <div class="level-item has-text-centered">
+                        <div>
+                            <p class="heading">dead</p>
+                            <p class="title" id="dead">0</p>
+                        </div>
+                    </div>
+                </nav>
+                <h3 class="subtitle is-3">Logged events: </h3>
+                <div id="logged-events">
+                    -
+                </div>
+            </section>
+        </div>
+        <div class="column">
+            <section id="free-for-all" class="section">
+                <h2 class="title is-2">Free for all</h2>
+                <p>A free for all simulation where each entity can move freely without any restriction</p>
+                <div class="buttons">
+                    <button type="submit" id="FFA-start" class="button is-info is-light">Start</button>
+                    <button type="submit" id="FFA-pause" class="button is-warning is-light">Pause</button>
+                    <button type="reset" id="FFA-restart" class="button is-danger is-light">Restart</button>
+                </div>
+
+            </section>
+
+            <section id="forced-quarantine" class="section">
+                <h2 class="title is-2">Forced quarantine</h2>
+                <div class="buttons">
+                    <button type="submit" id="FQ-start" class="button is-info is-light">Start</button>
+                    <button type="submit" id="FQ-pause" class="button is-warning is-light">Pause</button>
+                    <button type="reset" id="FQ-restart" class="button is-danger is-light">Restart</button>
+                </div>
+
+            </section>
+
+            <section id="one-quarter-free" class="section">
+                <h2 class="title is-2">One quarter can move freely</h2>
+                <div class="buttons">
+                    <button type="submit" id="OQ-start" class="button is-info is-light">Start</button>
+                    <button type="submit" id="OQ-pause" class="button is-warning is-light">Pause</button>
+                    <button type="reset" id="OQ-restart" class="button is-danger is-light">Restart</button>
+                </div>
+
+            </section>
+
+            <section id="one-eight-free" class="section">
+                <h2 class="title is-2">One eight can move freely</h2>
+                <div class="buttons">
+                    <button type="submit" id="OE-start" class="button is-info is-light">Start</button>
+                    <button type="submit" id="OE-pause" class="button is-warning is-light">Pause</button>
+                    <button type="reset" id="OE-restart" class="button is-danger is-light">Restart</button>
+                </div>
+
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

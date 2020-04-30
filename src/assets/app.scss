@@ -1,0 +1,12 @@
+@charset 'UTF-8';
+@import 'bulma';
+
+.sticky {
+    display: block;
+    width: 50vw;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    overflow: scroll;
+    background: #eef;
+}
