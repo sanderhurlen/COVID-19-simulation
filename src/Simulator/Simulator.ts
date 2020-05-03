@@ -8,8 +8,6 @@ import { selectAgeFromDistribution } from '../Person/PersonAgeStats';
 import { getRandomInt } from '../helper/random';
 import SimulationStats from '../helper/SimulationStats';
 import p5 from 'p5';
-import { Chart } from 'chart.js';
-import { standard } from '../Chart/Config';
 import { SimulationColors } from '../helper/SimulationColors';
 import SimConfig from '../helper/SimConfig';
 import SimScenearios from '../helper/SimScenearios';
@@ -38,11 +36,7 @@ export default class Simulator extends Subject {
 
     private _simulationField: Grid;
     // TODO redo this to one object of stats
-    private healthypersons: number;
-    private infectedpersons: number;
-    private recoveredpersons: number;
-    private inQuarantine: number;
-    private dead: number;
+    private simulationStats: SimulationStats;
     // ENDTODO
     private _persons: Array<Person>;
     private hours: number;
@@ -73,11 +67,14 @@ export default class Simulator extends Subject {
 
         this.numOfTimes = 0;
 
-        this.healthypersons = 0;
-        this.infectedpersons = 0;
-        this.recoveredpersons = 0;
-        this.inQuarantine = 0;
-        this.dead = 0;
+        this.simulationStats = {
+            day: 0,
+            suceptible: 0,
+            infected: 0,
+            recovered: 0,
+            inQuarantine: 0,
+            dead: 0,
+        };
         this._persons = [];
         this._fences = [];
 
@@ -152,6 +149,7 @@ export default class Simulator extends Subject {
             }
 
             p.setup = (): void => {
+                lastValue = 0;
                 lastValue = this.simulationIsAt;
                 p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
                 grid = this.simulationField;
@@ -163,7 +161,6 @@ export default class Simulator extends Subject {
                         if (cell instanceof Person) drawPerson(cell);
                     }
                 }
-                this.notify(this.currentSimulationDetails());
                 p.noLoop();
             };
 
@@ -218,26 +215,29 @@ export default class Simulator extends Subject {
                 this.notifyDead(person);
             }
         }
-        this._persons = this.updateStats();
+        this.updateStats();
     }
 
-    private updateStats(): Array<Person> {
+    private updateStats(): void {
         this._persons = new Array<Person>();
-        this.healthypersons = 0;
-        this.infectedpersons = 0;
-        this.recoveredpersons = 0;
-        this.dead = 0;
-        const temp = new Array<Person>();
+        this.simulationStats = {
+            day: 0,
+            suceptible: 0,
+            infected: 0,
+            recovered: 0,
+            inQuarantine: 0,
+            dead: 0,
+        };
         for (const row in this._simulationField.grid) {
             for (const col of this._simulationField.grid[row]) {
-                if (col instanceof Person) temp.push(col);
-                if (col instanceof Person && !col.isAlive()) this.dead++;
-                if (col instanceof HealthyPerson) this.healthypersons++;
-                if (col instanceof InfectedPerson && col.isRecovered()) this.recoveredpersons++;
-                if (col instanceof InfectedPerson && col.isSick()) this.infectedpersons++;
+                if (col instanceof Person) this._persons.push(col);
+                if (col instanceof Person && col.isQuarantined()) this.simulationStats.inQuarantine++;
+                if (col instanceof Person && !col.isAlive()) this.simulationStats.dead++;
+                if (col instanceof HealthyPerson) this.simulationStats.suceptible++;
+                if (col instanceof InfectedPerson && col.isRecovered()) this.simulationStats.recovered++;
+                if (col instanceof InfectedPerson && col.isSick()) this.simulationStats.infected++;
             }
         }
-        return temp;
     }
 
     public start(): void {
@@ -265,16 +265,21 @@ export default class Simulator extends Subject {
     }
 
     private reset(): void {
+        this.notifyReset();
         this._simulationField = new Grid(60, 40);
         this.hours = 0;
         this.timeAtReset = new Date().getSeconds();
 
         this.numOfTimes = 0;
 
-        this.healthypersons = 0;
-        this.infectedpersons = 0;
-        this.recoveredpersons = 0;
-        this.inQuarantine = 0;
+        this.simulationStats = {
+            day: 0,
+            suceptible: 0,
+            infected: 0,
+            recovered: 0,
+            inQuarantine: 0,
+            dead: 0,
+        };
         this._persons = [];
         this._fences = [];
         this.populate();
@@ -306,7 +311,7 @@ export default class Simulator extends Subject {
 
                 this._persons.push(addPerson);
                 this._simulationField.add(addPerson);
-                this.healthypersons++;
+                this.simulationStats.suceptible++;
                 occupiedLocations++;
             }
 
@@ -345,12 +350,12 @@ export default class Simulator extends Subject {
     private applyQuarantine(amount: number): void {
         let loopRestriction = 0;
         let rnd: number;
-        while (this.inQuarantine < amount && loopRestriction < 1000) {
+        while (this.simulationStats.inQuarantine < amount && loopRestriction < 1000) {
             rnd = Math.floor(Math.random() * this._persons.length);
             const person = this._persons[rnd];
             if (person instanceof HealthyPerson && !person.isQuarantined()) {
                 person.setQuarantine(true);
-                this.inQuarantine++;
+                this.simulationStats.inQuarantine++;
             }
             loopRestriction++;
         }
@@ -371,8 +376,8 @@ export default class Simulator extends Subject {
 
         this._simulationField.add(p);
         this._persons.push(p);
-        this.infectedpersons++;
-        this.healthypersons--;
+        this.simulationStats.infected++;
+        this.simulationStats.suceptible--;
     }
 
     /**
@@ -380,14 +385,8 @@ export default class Simulator extends Subject {
      * @returns [healthy people, infected people]
      */
     public currentSimulationDetails(): SimulationStats {
-        return {
-            day: Math.floor(this.hours / 24),
-            suceptible: this.healthypersons,
-            infected: this.infectedpersons,
-            recovered: this.recoveredpersons,
-            inQuarantine: this.inQuarantine,
-            dead: this.dead,
-        };
+        this.simulationStats.day = Math.floor(this.hours / 24);
+        return this.simulationStats;
     }
 
     public get simulationField(): Grid {
@@ -409,9 +408,16 @@ export default class Simulator extends Subject {
         return Math.floor(this.hours / 24);
     }
 
+    /**
+     * Returns true to end the simulation when one of the following conditions is true
+     * - total amount of recovered is equal to total amount
+     *      of persons. I.e. All persons in simulation is recovered
+     * - There exists no more infected persons in the simulation.
+     * @returns true or false if the simulation should end with one of the satisfying conditions
+     */
     public simulationShouldEnd(): boolean {
-        if (this.recoveredpersons == this.AMOUNT_OF_PERSONS) return true;
-        if (this.recoveredpersons + this.healthypersons == this.AMOUNT_OF_PERSONS) return true;
+        if (this.simulationStats.recovered == this.AMOUNT_OF_PERSONS) return true;
+        if (this.simulationStats.recovered + this.simulationStats.suceptible == this.AMOUNT_OF_PERSONS) return true;
         return false;
     }
 }
