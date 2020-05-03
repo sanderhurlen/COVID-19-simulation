@@ -4,4 +4,6 @@ export default abstract class Observer {
     public abstract update(data: {}): void;
 
     public abstract OnDead(person: Person): void;
+
+    public abstract OnReset(): void;
 }

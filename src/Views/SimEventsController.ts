@@ -20,6 +20,14 @@ export default class SimulationEventsController extends Observer {
 
     public update(data: {}): void {}
 
+    public OnReset(): void {
+        let child = this.eventsDOM?.lastElementChild;
+        while (child) {
+            this.eventsDOM?.removeChild(child);
+            child = this.eventsDOM?.lastElementChild;
+        }
+    }
+
     public OnDead(person: Person): void {
         if (person != null) {
             let inList = false;

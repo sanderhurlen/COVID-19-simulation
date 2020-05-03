@@ -78,7 +78,7 @@ export default class Simulator extends Subject {
         this._fences = [];
 
         const statView = new StatView();
-        const chartView = new ChartViewController('sim-1');
+        const chartView = new ChartViewController();
         const eventLog = new SimulationEventsController('logged-events');
 
         this.addObserver(statView);
@@ -167,6 +167,8 @@ export default class Simulator extends Subject {
                 p.frameRate(20);
                 if (this.simulationShouldEnd()) p.noLoop();
                 if (this.simulationIsAt > lastValue) {
+                    console.log('pinged');
+
                     this.notify(this.currentSimulationDetails());
                     lastValue = this.simulationIsAt;
                 }
@@ -249,6 +251,7 @@ export default class Simulator extends Subject {
 
     public restart(): void {
         this.reset();
+        this._p5?.setup();
         this.pause();
         this._p5?.draw();
     }

@@ -1,19 +1,21 @@
 import Observer from '../lib/observer';
 import Chart from 'chart.js';
-import { standard } from '../Chart/Config';
+import ConfigStandard from '../Chart/Config';
 import SimulationStats from '../helper/SimulationStats';
 import Person from '../Person/Person';
 
 export default class ChartViewController extends Observer {
+    private chartContainer: HTMLElement | null;
     private chartCanvas: any;
-    private chartElement: any;
+    private chartElement: CanvasRenderingContext2D;
     private chart: Chart;
 
-    constructor(canvasName: string) {
+    constructor() {
         super();
-        this.chartCanvas = document.getElementById(canvasName);
-        this.chartElement = this.chartCanvas.getContext('2d');
-        this.chart = new Chart(this.chartElement, standard);
+        this.chartContainer = document.getElementById('chart-container');
+        this.chartCanvas = document.getElementById('sim-1');
+        this.chartElement = this.chartCanvas?.getContext('2d');
+        this.chart = new Chart(this.chartElement, new ConfigStandard().initiate());
     }
 
     private setWidth(width: number): void {
@@ -32,6 +34,12 @@ export default class ChartViewController extends Observer {
 
     public update(data: SimulationStats): void {
         this.updateChart(data);
+    }
+
+    public OnReset(): void {
+        this.chart.destroy();
+        this.chart = new Chart(this.chartElement, new ConfigStandard().initiate());
+        this.chart.update();
     }
 
     public OnDead(person: Person): void {}

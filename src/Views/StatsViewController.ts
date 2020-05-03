@@ -9,15 +9,14 @@ export default class StatView extends Observer {
     private recovered: HTMLElement | null;
     private dead: HTMLElement | null;
 
-    private subscription: Simulator | null;
-
     constructor() {
         super();
         this.suceptible = document.getElementById('suceptible');
         this.infected = document.getElementById('infected');
         this.recovered = document.getElementById('recovered');
         this.dead = document.getElementById('dead');
-        this.subscription = null;
+
+        this.reset();
     }
 
     public update(data: SimulationStats): void {
@@ -27,6 +26,20 @@ export default class StatView extends Observer {
             if (this.recovered) this.recovered.innerText = '' + data.recovered;
             if (this.dead) this.dead.innerText = '' + data.dead;
         }
+    }
+
+    private reset(): void {
+        if (this.suceptible) this.suceptible.innerText = '-';
+        if (this.infected) this.infected.innerText = '-';
+        if (this.recovered) this.recovered.innerText = '-';
+        if (this.dead) this.dead.innerText = '-';
+    }
+
+    /** Called when the subject notifies a OnReset event needs to happen.
+     * Usually upon initiliaztion of a new simulation, and on restart
+     */
+    public OnReset(): void {
+        this.reset();
     }
 
     public OnDead(person: Person): void {}

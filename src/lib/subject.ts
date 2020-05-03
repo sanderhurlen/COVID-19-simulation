@@ -33,4 +33,10 @@ export default class Subject {
             observer.OnDead(person);
         });
     }
+
+    public notifyReset(): void {
+        this.observers.forEach((observer) => {
+            observer.OnReset();
+        });
+    }
 }
