@@ -92,8 +92,6 @@ export default abstract class Person extends Cell {
         }
 
         if (this.deathIsAllowed) {
-            console.log('is tried to kill');
-
             this.alive = this.testMortality(this.ageIsAllowed);
         }
     }
@@ -103,7 +101,7 @@ export default abstract class Person extends Cell {
         this.onNewDay();
     }
 
-    /** a trivial abstract method for a class that is extending the person to apply something
+    /** a abstract method for a class that is extending the person to apply something
      *  that is happening every day. For example a sick person
      * may increment the count of days sick... */
     public abstract onNewDay(): void;

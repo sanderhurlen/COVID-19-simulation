@@ -13,8 +13,12 @@ import { standard } from '../Chart/Config';
 import { SimulationColors } from '../helper/SimulationColors';
 import SimConfig from '../helper/SimConfig';
 import SimScenearios from '../helper/SimScenearios';
+import Subject from '../lib/subject';
+import StatView from '../Views/StatsViewController';
+import ChartViewController from '../Views/ChartViewController';
+import SimulationEventsController from '../Views/SimEventsController';
 
-export default class Simulator {
+export default class Simulator extends Subject {
     private readonly AMOUNT_OF_PERSONS = 200;
     private readonly START_AMOUNT_INFECTED = 1;
     private readonly START_AMOUNT_HEALTHY = this.AMOUNT_OF_PERSONS - this.START_AMOUNT_INFECTED;
@@ -49,6 +53,7 @@ export default class Simulator {
     private _p5: p5 | undefined;
 
     constructor(width: number, height: number, config: SimConfig) {
+        super();
         let w = width;
         let h = height;
         if (width <= 0 && height <= 0) {
@@ -76,6 +81,14 @@ export default class Simulator {
         this._persons = [];
         this._fences = [];
 
+        const statView = new StatView();
+        const chartView = new ChartViewController('sim-1');
+        const eventLog = new SimulationEventsController('logged-events');
+
+        this.addObserver(statView);
+        this.addObserver(chartView);
+        this.addObserver(eventLog);
+
         this.reset();
 
         this.initialize(config.canvas);
@@ -95,10 +108,6 @@ export default class Simulator {
             let lastValue = 0;
             let grid = this.simulationField;
 
-            const canvas: any = document.getElementById('sim-1');
-            const ctx = canvas.getContext('2d');
-            let chart: Chart = new Chart(ctx, standard);
-
             function inQuarantineMarker(person: Person): void {
                 p.strokeWeight(2);
                 p.stroke(SimulationColors.QUARANTINE);
@@ -107,7 +116,7 @@ export default class Simulator {
                 p.square(person.location.X * RESOLUTION + SPACE, person.location.Y * RESOLUTION + SPACE, RESOLUTION);
             }
 
-            function drawPerson(person: Person): void {
+            const drawPerson = (person: Person): void => {
                 const x = person?.location.X;
                 const y = person?.location.Y;
                 let color = '#ffffff';
@@ -131,7 +140,7 @@ export default class Simulator {
                 p.strokeWeight(5);
                 p.point(x * RESOLUTION + POINT_CENTER, y * RESOLUTION + POINT_CENTER);
                 if (person.isQuarantined()) inQuarantineMarker(person);
-            }
+            };
 
             function drawFence(cell: Cell): void {
                 const x = cell?.location.X;
@@ -140,27 +149,6 @@ export default class Simulator {
                 p.fill(SimulationColors.FENCE);
                 p.rectMode('center');
                 p.square(x * RESOLUTION + SPACE, y * RESOLUTION + SPACE, RESOLUTION);
-            }
-
-            function updateChart(data: SimulationStats): void {
-                chart.data.labels!.push(data.day);
-                if (chart.data.datasets) {
-                    chart.data.datasets[0].data!.push(data.suceptible);
-                    chart.data.datasets[1].data!.push(data.infected);
-                    chart.data.datasets[2].data!.push(data.recovered);
-                }
-                console.log(data);
-                chart.update({ duration: 2 });
-            }
-
-            function renderChart(data: SimulationStats): void {
-                const canvas: any = document.getElementById('sim-1');
-                const ctx = canvas.getContext('2d');
-
-                chart = new Chart(ctx, standard);
-                const c = document.getElementById('sim-1');
-                c?.setAttribute('style', `width: ${600}px`);
-                updateChart(data);
             }
 
             p.setup = (): void => {
@@ -175,7 +163,7 @@ export default class Simulator {
                         if (cell instanceof Person) drawPerson(cell);
                     }
                 }
-                renderChart(this.currentSimulationDetails());
+                this.notify(this.currentSimulationDetails());
                 p.noLoop();
             };
 
@@ -183,7 +171,7 @@ export default class Simulator {
                 p.frameRate(20);
                 if (this.simulationShouldEnd()) p.noLoop();
                 if (this.simulationIsAt > lastValue) {
-                    updateChart(this.currentSimulationDetails());
+                    this.notify(this.currentSimulationDetails());
                     lastValue = this.simulationIsAt;
                 }
                 p.background(SimulationColors.CANVAS_BACKGROUND);
@@ -226,7 +214,9 @@ export default class Simulator {
 
         for (let i = this._persons.length - 1; i >= 0; i--) {
             const person = this._persons[i];
-            person.do();
+            if (!person.do()) {
+                this.notifyDead(person);
+            }
         }
         this._persons = this.updateStats();
     }
@@ -287,9 +277,7 @@ export default class Simulator {
         this.inQuarantine = 0;
         this._persons = [];
         this._fences = [];
-        // TODO reset simulator views
         this.populate();
-        // TODO update simulator views
     }
 
     private populate(): void {
