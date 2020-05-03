@@ -1,9 +1,28 @@
 // packing files
 import p5 from 'p5';
+import './assets/app.scss';
 
 // Class files
 import Simulator from './Simulator/Simulator';
 import SimScenearios from './helper/SimScenearios';
+
+const root = document.getElementById('bcg');
+const column = document.getElementById('left');
+const sticky = column?.offsetTop;
+
+window.onscroll = function () {
+    if (sticky) {
+        if (window.pageYOffset > sticky) {
+            column?.classList.add('sticky');
+            root?.classList.add('bcg');
+            if (root) root.style.transition = 'background 1s';
+        } else {
+            column?.classList.remove('sticky');
+            root?.classList.remove('bcg');
+            if (root) root.style.transition = 'background 1s';
+        }
+    }
+};
 
 // set up all p5 canvases
 const canvFFA = document.getElementById('free-for-all');
@@ -37,18 +56,29 @@ enableAge.checked = false;
 const enableDeath = document.getElementById('death-checkbox') as HTMLInputElement;
 enableDeath.checked = false;
 
-enableAge?.addEventListener('change', () => {
+function enableAgeForSimulations() {
     freeForAll.enableAge(enableAge.checked);
     forcedQ.enableAge(enableAge.checked);
     quarterFree.enableAge(enableAge.checked);
     eightFree.enableAge(enableAge.checked);
-});
+}
 
-enableDeath?.addEventListener('click', () => {
+function enableDeathForSimulations() {
     freeForAll.enableMortality(enableDeath.checked);
     forcedQ.enableMortality(enableDeath.checked);
     quarterFree.enableMortality(enableDeath.checked);
     eightFree.enableMortality(enableDeath.checked);
+}
+enableAge?.addEventListener('click', () => {
+    if (!enableDeath.checked) {
+        enableDeath.checked = true;
+        enableDeathForSimulations();
+    }
+    enableAgeForSimulations();
+});
+
+enableDeath?.addEventListener('click', () => {
+    enableDeathForSimulations();
 });
 
 // Free for all buttons
