@@ -11,14 +11,12 @@
 </head>
 
 <body>
-
-
     <nav class="level">
         <p class="level-item has-text-centered">
             <a class="link is-info">About</a>
         </p>
         <p class="level-item has-text-centered">
-            <img src="https://bulma.io/images/bulma-type.png" alt="" style="height: 30px;">
+            COVID-19 Simulation
         </p>
         <p class="level-item has-text-centered">
             <label for="age-checkbox" class="checkbox">
@@ -35,22 +33,22 @@
     </nav>
     <section class="section">
         <h1 class="title is-1">About the project</h1>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus exercitationem nobis tempora officiis
-            totam doloremque sunt voluptatem assumenda, expedita iusto temporibus porro corporis ab dicta distinctio
-            iure corrupti blanditiis consequatur.
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Vitae modi dolor excepturi obcaecati iusto. Quod
-            omnis, labore obcaecati enim culpa aperiam dolor harum esse minima ex pariatur tenetur error sunt.
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi, expedita. Odit, obcaecati dicta quos eius
-            explicabo, voluptatem, ab ratione animi cupiditate asperiores recusandae eum rerum. Eius quae id molestias
-            voluptate. Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis voluptatum dolores a delectus,
-            reiciendis alias distinctio veritatis doloremque libero, necessitatibus iure sit possimus eos? Blanditiis
-            explicabo odio reiciendis quos eos.
+        <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus exercitationem nobis tempora
+            officiis totam doloremque sunt voluptatem assumenda, expedita iusto temporibus porro corporis ab dicta
+            distinctio iure corrupti blanditiis consequatur. Lorem ipsum dolor sit amet consectetur adipisicing
+            elit. Vitae modi dolor excepturi obcaecati iusto. Quod omnis, labore obcaecati enim culpa aperiam dolor
+            harum esse minima ex pariatur tenetur error sunt. Lorem ipsum dolor sit amet consectetur adipisicing
+            elit. Commodi, expedita. Odit, obcaecati dicta quos eius explicabo, voluptatem, ab ratione animi
+            cupiditate asperiores recusandae eum rerum. Eius quae id molestias voluptate. Lorem ipsum dolor sit amet
+            consectetur adipisicing elit. Debitis voluptatum dolores a delectus, reiciendis alias distinctio
+            veritatis doloremque libero, necessitatibus iure sit possimus eos? Blanditiis explicabo odio reiciendis
+            quos eos.
         </p>
     </section>
 
-
     <div class="columns">
-        <div class="column is-half">
+        <div class="column is-half" id="bcg">
             <section class="section" id="left">
                 <h2 class="title is-2">Stats</h2>
                 <canvas id="sim-1"></canvas>
@@ -80,9 +78,8 @@
                         </div>
                     </div>
                 </nav>
-                <h3 class="subtitle is-3">Logged events: </h3>
+                <h3 class="subtitle is-3">Logged events:</h3>
                 <div id="logged-events">
-                    -
                 </div>
             </section>
         </div>
@@ -95,7 +92,6 @@
                     <button type="submit" id="FFA-pause" class="button is-warning is-light">Pause</button>
                     <button type="reset" id="FFA-restart" class="button is-danger is-light">Restart</button>
                 </div>
-
             </section>
 
             <section id="forced-quarantine" class="section">
@@ -105,7 +101,6 @@
                     <button type="submit" id="FQ-pause" class="button is-warning is-light">Pause</button>
                     <button type="reset" id="FQ-restart" class="button is-danger is-light">Restart</button>
                 </div>
-
             </section>
 
             <section id="one-quarter-free" class="section">
@@ -115,7 +110,6 @@
                     <button type="submit" id="OQ-pause" class="button is-warning is-light">Pause</button>
                     <button type="reset" id="OQ-restart" class="button is-danger is-light">Restart</button>
                 </div>
-
             </section>
 
             <section id="one-eight-free" class="section">
@@ -125,7 +119,6 @@
                     <button type="submit" id="OE-pause" class="button is-warning is-light">Pause</button>
                     <button type="reset" id="OE-restart" class="button is-danger is-light">Restart</button>
                 </div>
-
             </section>
         </div>
     </div>
