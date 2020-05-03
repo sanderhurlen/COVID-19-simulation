@@ -35,7 +35,6 @@ export default class Simulator extends Subject {
     private timeAtReset: number;
 
     private _simulationField: Grid;
-    // TODO redo this to one object of stats
     private simulationStats: SimulationStats;
     // ENDTODO
     private _persons: Array<Person>;
