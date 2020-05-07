@@ -150,11 +150,12 @@ export default class Simulator extends Subject {
             }
 
             p.setup = (): void => {
-                lastValue = 0;
                 lastValue = this.simulationIsAt;
-                p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
                 grid = this.simulationField;
+
+                p.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
                 p.background(SimulationColors.CANVAS_BACKGROUND);
+
                 for (let i = 0; i < grid.grid.length; i++) {
                     for (let j = 0; j < grid.grid[i].length; j++) {
                         const cell: Cell | null = grid.grid[i][j];

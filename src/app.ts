@@ -1,5 +1,4 @@
 // packing files
-import p5 from 'p5';
 import './assets/app.scss';
 
 // Class files
@@ -10,7 +9,7 @@ const root = document.getElementById('bcg');
 const column = document.getElementById('left');
 const sticky = column?.offsetTop;
 
-window.onscroll = function () {
+window.onscroll = function (): void {
     if (sticky) {
         if (window.pageYOffset > sticky) {
             column?.classList.add('sticky');
@@ -56,14 +55,14 @@ enableAge.checked = false;
 const enableDeath = document.getElementById('death-checkbox') as HTMLInputElement;
 enableDeath.checked = false;
 
-function enableAgeForSimulations() {
+function enableAgeForSimulations(): void {
     freeForAll.enableAge(enableAge.checked);
     forcedQ.enableAge(enableAge.checked);
     quarterFree.enableAge(enableAge.checked);
     eightFree.enableAge(enableAge.checked);
 }
 
-function enableDeathForSimulations() {
+function enableDeathForSimulations(): void {
     freeForAll.enableMortality(enableDeath.checked);
     forcedQ.enableMortality(enableDeath.checked);
     quarterFree.enableMortality(enableDeath.checked);
