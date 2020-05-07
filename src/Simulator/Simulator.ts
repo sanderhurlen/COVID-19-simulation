@@ -45,11 +45,13 @@ export default class Simulator extends Subject {
 
     private _p5: p5 | undefined;
 
+    private isSimulating = false;
+
     constructor(width: number, height: number, config: SimConfig) {
         super();
         let w = width;
         let h = height;
-        if (width <= 0 && height <= 0) {
+        if (w <= 0 && h <= 0) {
             console.warn('Provided width and height is not acceptable');
             console.warn('using default values');
             w = 200;
@@ -160,18 +162,22 @@ export default class Simulator extends Subject {
                         if (cell instanceof Person) drawPerson(cell);
                     }
                 }
-                p.noLoop();
             };
 
             p.draw = (): void => {
                 p.frameRate(20);
-                if (this.simulationShouldEnd()) p.noLoop();
-                if (this.simulationIsAt > lastValue) {
-                    console.log('pinged');
+                if (this.simulationShouldEnd() || this.simulationIsPaused()) {
+                    p.noLoop();
+                } else {
+                    this.simulate();
+                }
 
+                if (this.simulationIsAt > lastValue) {
                     this.notify(this.currentSimulationDetails());
                     lastValue = this.simulationIsAt;
                 }
+
+                // reset background
                 p.background(SimulationColors.CANVAS_BACKGROUND);
 
                 // draw fence
@@ -180,8 +186,6 @@ export default class Simulator extends Subject {
                         if (fence.isFence) drawFence(fence);
                     }
                 }
-
-                this.simulate();
 
                 // draw all persons in grid
                 for (const person of this.persons) {
@@ -242,10 +246,12 @@ export default class Simulator extends Subject {
     }
 
     public start(): void {
+        this.isSimulating = true;
         this._p5?.loop();
     }
 
     public pause(): void {
+        this.isSimulating = false;
         this._p5?.noLoop();
     }
 
@@ -364,18 +370,16 @@ export default class Simulator extends Subject {
     }
 
     private pickInfectedPerson(): void {
-        let rnd = 0;
         let x = 0;
         let y = 0;
         if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) {
-            rnd = Math.floor(Math.random() * this.QUARANTINE_FENCE_ATX);
-            x = rnd;
+            x = Math.floor(Math.random() * this.QUARANTINE_FENCE_ATX);
         } else {
             x = Math.floor(Math.random() * this._simulationField.width);
         }
         y = Math.floor(Math.random() * this._simulationField.height);
         const p = new InfectedPerson(this._simulationField, new Location(x, y), Math.floor(Math.random() * 10));
-
+        console.table(p.location);
         this._simulationField.add(p);
         this._persons.push(p);
         this.simulationStats.infected++;
@@ -421,5 +425,13 @@ export default class Simulator extends Subject {
         if (this.simulationStats.recovered == this.AMOUNT_OF_PERSONS) return true;
         if (this.simulationStats.recovered + this.simulationStats.suceptible == this.AMOUNT_OF_PERSONS) return true;
         return false;
+    }
+
+    /**
+     * Helper function to check if simulation is simulating
+     */
+    private simulationIsPaused(): boolean {
+        if (this.isSimulating) return false;
+        return true;
     }
 }
