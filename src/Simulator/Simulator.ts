@@ -45,7 +45,7 @@ export default class Simulator extends Subject {
 
     private _p5: p5 | undefined;
 
-    private isSimulating = false;
+    private _isSimulating = false;
 
     constructor(width: number, height: number, config: SimConfig) {
         super();
@@ -167,7 +167,10 @@ export default class Simulator extends Subject {
 
             p.draw = (): void => {
                 p.frameRate(20);
+
                 if (this.simulationShouldEnd() || this.simulationIsPaused()) {
+                    console.log('! ' + this.simulationShouldEnd() + '   ' + this.simulationIsPaused());
+
                     p.noLoop();
                 } else {
                     this.simulate();
@@ -246,16 +249,26 @@ export default class Simulator extends Subject {
         }
     }
 
+    /**
+     * Starts the simulator that has been set up on the website
+     */
     public start(): void {
-        this.isSimulating = true;
+        this._isSimulating = true;
         this._p5?.loop();
+        // this._p5?.draw();
     }
 
+    /**
+     * Pauses the simulator
+     */
     public pause(): void {
-        this.isSimulating = false;
+        this._isSimulating = false;
         this._p5?.noLoop();
     }
 
+    /**
+     * Restarts the simulator
+     */
     public restart(): void {
         this.reset();
         this._p5?.setup();
@@ -263,11 +276,21 @@ export default class Simulator extends Subject {
         this._p5?.draw();
     }
 
+    /**
+     * Enables age for the simulation. The age is a factor to if a person should die or not.
+     * When enabling age, the simulation will automatically be restarted for changes to take effect.
+     * @param v is the boolean value for if the age option should be enabled or not. True for enable age, false for not enabled
+     */
     public enableAge(v: boolean): void {
         this.ageIsEnabled = v;
         this.restart();
     }
 
+    /**
+     * Enables mortality for the simulation. I.e. the persons can in fact die.
+     * When enabling the mortality, the simulation will automatically be restarted for changes to take effect.
+     * @param v true for mortality should be enabled, false if not
+     */
     public enableMortality(v: boolean): void {
         this.deathIsEnabled = v;
         this.restart();
@@ -294,38 +317,16 @@ export default class Simulator extends Subject {
         this.populate();
     }
 
+    /**
+     * Populates the grid with simulation data.
+     * The simulation is required to have a infected person to start with, the rest suceptible and eventual people in quarantine, fences etc.
+     * This function is responsible for setting this up.
+     */
     private populate(): void {
-        let occupiedLocations = 0;
-        let loopRestriction = 0;
-
         if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) this.applyQuarantineFence();
 
-        this.pickInfectedPerson();
-
-        while (occupiedLocations < this.START_AMOUNT_HEALTHY && loopRestriction < 10000) {
-            const posX = Math.floor(Math.random() * this._simulationField.width);
-            const posY = Math.floor(Math.random() * this._simulationField.height);
-            const tryLocation = new Location(posX, posY);
-
-            if (!this._simulationField.isOccupied(tryLocation)) {
-                const pa = selectAgeFromDistribution();
-                const age = getRandomInt(pa.minAge, pa.maxAge);
-                const addPerson = new HealthyPerson(this._simulationField, tryLocation, age);
-
-                addPerson.enableAgeOption(this.ageIsEnabled);
-                addPerson.enableDeathOption(this.deathIsEnabled);
-
-                if (this.SCENEARIO === SimScenearios.QUARANTINE_QUARTER) this.applyQuarantine(this.THREE_QUARTER_FREE);
-                if (this.SCENEARIO === SimScenearios.QUARANTINE_EIGHT) this.applyQuarantine(this.ONE_IN_EIGHT_FREE);
-
-                this._persons.push(addPerson);
-                this._simulationField.add(addPerson);
-                this.simulationStats.suceptible++;
-                occupiedLocations++;
-            }
-
-            loopRestriction++;
-        }
+        this.spawnInfectedPerson(this.START_AMOUNT_INFECTED);
+        this.spawnSuceptiblePersons(this.START_AMOUNT_HEALTHY);
     }
 
     // TODO make this a little bit prettier...
@@ -344,9 +345,14 @@ export default class Simulator extends Subject {
         this._fences = beginning.concat(end);
     }
 
+    /**
+     * Sets up a quarantine fence for the simulation
+     */
     private applyQuarantineFence(): void {
         for (let y = 0; y < this._simulationField.grid[this.QUARANTINE_FENCE_ATX].length; y++) {
             const c = new Cell(this._simulationField, new Location(this.QUARANTINE_FENCE_ATX, y), CellStates.FENCE);
+
+            // add to simulation grid etc
             this._simulationField.add(c);
             this._fences.push(c);
         }
@@ -359,9 +365,11 @@ export default class Simulator extends Subject {
     private applyQuarantine(amount: number): void {
         let loopRestriction = 0;
         let rnd: number;
+
         while (this.simulationStats.inQuarantine < amount && loopRestriction < 1000) {
             rnd = Math.floor(Math.random() * this._persons.length);
             const person = this._persons[rnd];
+
             if (person instanceof HealthyPerson && !person.isQuarantined()) {
                 person.setQuarantine(true);
                 this.simulationStats.inQuarantine++;
@@ -370,30 +378,99 @@ export default class Simulator extends Subject {
         }
     }
 
-    private pickInfectedPerson(): void {
+    /**
+     * Spawns an infected person for the simulation to start with. The person is placed randomly between the available width it can spawn on.
+     * If the quarantine fence is enabled, the person can only spawn inside this area.
+     */
+    private spawnInfectedPerson(amount: number): void {
         let x = 0;
         let y = 0;
-        if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) {
-            x = Math.floor(Math.random() * this.QUARANTINE_FENCE_ATX);
-        } else {
-            x = Math.floor(Math.random() * this._simulationField.width);
+
+        while (this.simulationStats.infected < amount) {
+            if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) {
+                x = Math.floor(Math.random() * this.QUARANTINE_FENCE_ATX);
+            } else {
+                x = Math.floor(Math.random() * this._simulationField.width);
+            }
+            y = Math.floor(Math.random() * this._simulationField.height);
+            const p = new InfectedPerson(this._simulationField, new Location(x, y), Math.floor(Math.random() * 10));
+
+            this.addPersonToSimulation(p);
+
+            // update stats
+            this.simulationStats.infected++;
         }
-        y = Math.floor(Math.random() * this._simulationField.height);
-        const p = new InfectedPerson(this._simulationField, new Location(x, y), Math.floor(Math.random() * 10));
-        console.table(p.location);
-        this._simulationField.add(p);
-        this._persons.push(p);
-        this.simulationStats.infected++;
-        this.simulationStats.suceptible--;
     }
 
     /**
-     * Returns an array of numbers with number of healthy persons and number of infected persons
-     * @returns [healthy people, infected people]
+     * Spawns suceptible persons on the grid for the simulation
+     * The spawning is done randomly over the grid, limited by the simulation config.
+     */
+    private spawnSuceptiblePersons(amount: number): void {
+        let loopRestriction = 0;
+
+        while (this.simulationStats.suceptible < amount && loopRestriction < 10000) {
+            const posX = Math.floor(Math.random() * this._simulationField.width);
+            const posY = Math.floor(Math.random() * this._simulationField.height);
+            const tryLocation = new Location(posX, posY);
+
+            if (!this._simulationField.isOccupied(tryLocation)) {
+                const pa = selectAgeFromDistribution();
+                const age = getRandomInt(pa.minAge, pa.maxAge);
+                const addPerson = new HealthyPerson(this._simulationField, tryLocation, age);
+
+                addPerson.enableAgeOption(this.ageIsEnabled);
+                addPerson.enableDeathOption(this.deathIsEnabled);
+
+                if (this.SCENEARIO === SimScenearios.QUARANTINE_QUARTER) this.applyQuarantine(this.THREE_QUARTER_FREE);
+                if (this.SCENEARIO === SimScenearios.QUARANTINE_EIGHT) this.applyQuarantine(this.ONE_IN_EIGHT_FREE);
+
+                this.addPersonToSimulation(addPerson);
+                this.simulationStats.suceptible++;
+            }
+
+            loopRestriction++;
+        }
+    }
+
+    /**
+     * Returns the simulations stats object along with the day the stats is requested.
+     * @returns SimulationStats object containing the simulation statistics
      */
     public currentSimulationDetails(): SimulationStats {
-        this.simulationStats.day = Math.floor(this.hours / 24);
+        this.simulationStats.day = this.simulationIsAt;
         return this.simulationStats;
+    }
+
+    /**
+     * Returns true to end the simulation when one of the following conditions is true
+     * - total amount of recovered is equal to total amount
+     *      of persons. I.e. All persons in simulation is recovered
+     * - There exists no more infected persons in the simulation.
+     * @returns true or false if the simulation should end with one of the satisfying conditions
+     */
+    public simulationShouldEnd(): boolean {
+        if (this.simulationStats.recovered == this.AMOUNT_OF_PERSONS) return true;
+        if (this.simulationStats.recovered + this.simulationStats.suceptible == this.AMOUNT_OF_PERSONS) return true;
+        return false;
+    }
+
+    /**
+     * Helper function to check if simulation is simulating
+     */
+    public simulationIsPaused(): boolean {
+        if (this._isSimulating) return false;
+        return true;
+    }
+
+    /**
+     * Adds a person to the simulation.
+     * A person will be added to all arrays/grids necessary
+     * @param p The person added to the simulation
+     */
+    public addPersonToSimulation(p: Person): void {
+        this._simulationField.add(p);
+        this._persons.push(p);
     }
 
     public get simulationField(): Grid {
@@ -413,26 +490,5 @@ export default class Simulator extends Subject {
      */
     public get simulationIsAt(): number {
         return Math.floor(this.hours / 24);
-    }
-
-    /**
-     * Returns true to end the simulation when one of the following conditions is true
-     * - total amount of recovered is equal to total amount
-     *      of persons. I.e. All persons in simulation is recovered
-     * - There exists no more infected persons in the simulation.
-     * @returns true or false if the simulation should end with one of the satisfying conditions
-     */
-    public simulationShouldEnd(): boolean {
-        if (this.simulationStats.recovered == this.AMOUNT_OF_PERSONS) return true;
-        if (this.simulationStats.recovered + this.simulationStats.suceptible == this.AMOUNT_OF_PERSONS) return true;
-        return false;
-    }
-
-    /**
-     * Helper function to check if simulation is simulating
-     */
-    private simulationIsPaused(): boolean {
-        if (this.isSimulating) return false;
-        return true;
     }
 }
