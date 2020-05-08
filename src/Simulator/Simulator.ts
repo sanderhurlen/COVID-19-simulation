@@ -17,9 +17,7 @@ import ChartViewController from '../Views/ChartViewController';
 import SimulationEventsController from '../Views/SimEventsController';
 
 export default class Simulator extends Subject {
-    private readonly AMOUNT_OF_PERSONS = 200;
-    private readonly START_AMOUNT_INFECTED = 1;
-    private readonly START_AMOUNT_HEALTHY = this.AMOUNT_OF_PERSONS - this.START_AMOUNT_INFECTED;
+    private config: SimConfig;
 
     private SCENEARIO: SimScenearios;
     private readonly QUARANTINE_FENCE_ATX = 15;
@@ -27,17 +25,18 @@ export default class Simulator extends Subject {
     private _fences: Array<Cell>;
     private readonly NUM_OF_TIMES = 3;
     private numOfTimes: number;
-    private readonly THREE_QUARTER_FREE = Math.floor((3 / 4) * this.AMOUNT_OF_PERSONS);
-    private readonly ONE_IN_EIGHT_FREE = Math.floor((7 / 8) * this.AMOUNT_OF_PERSONS);
+    // TODO refactor this. 200 is static
+    private readonly THREE_QUARTER_FREE = Math.floor((3 / 4) * 200);
+    private readonly ONE_IN_EIGHT_FREE = Math.floor((7 / 8) * 200);
 
     // timer
     private currentTime: number;
     private timeAtReset: number;
 
     private _simulationField: Grid;
+    private _persons: Array<Person>;
 
     private simulationStats: SimulationStats;
-    private _persons: Array<Person>;
     private hours: number;
 
     private ageIsEnabled: boolean;
@@ -58,26 +57,12 @@ export default class Simulator extends Subject {
             h = 400;
         }
         this._simulationField = new Grid(w, h);
-        this.hours = 0;
-        this.timeAtReset = 0;
         this.currentTime = 0;
+        this.config = config;
         this.SCENEARIO = config.sceneario;
 
         this.ageIsEnabled = false;
         this.deathIsEnabled = false;
-
-        this.numOfTimes = 0;
-
-        this.simulationStats = {
-            day: 0,
-            suceptible: 0,
-            infected: 0,
-            recovered: 0,
-            inQuarantine: 0,
-            dead: 0,
-        };
-        this._persons = [];
-        this._fences = [];
 
         const statView = new StatView();
         const chartView = new ChartViewController();
@@ -87,7 +72,7 @@ export default class Simulator extends Subject {
         this.addObserver(chartView);
         this.addObserver(eventLog);
 
-        this.reset();
+        this.reset(w, h);
 
         this.initialize(config.canvas);
     }
@@ -270,7 +255,7 @@ export default class Simulator extends Subject {
      * Restarts the simulator
      */
     public restart(): void {
-        this.reset();
+        this.reset(60, 40);
         this._p5?.setup();
         this.pause();
         this._p5?.draw();
@@ -296,9 +281,9 @@ export default class Simulator extends Subject {
         this.restart();
     }
 
-    private reset(): void {
+    private reset(w: number, h: number): void {
         this.notifyReset();
-        this._simulationField = new Grid(60, 40);
+        this._simulationField = new Grid(w, h);
         this.hours = 0;
         this.timeAtReset = new Date().getSeconds();
 
@@ -325,8 +310,8 @@ export default class Simulator extends Subject {
     private populate(): void {
         if (this.SCENEARIO === SimScenearios.QUARANTINE_FENCE) this.applyQuarantineFence();
 
-        this.spawnInfectedPerson(this.START_AMOUNT_INFECTED);
-        this.spawnSuceptiblePersons(this.START_AMOUNT_HEALTHY);
+        this.spawnInfectedPerson(this.config.START_AMOUNT_INFECTED);
+        this.spawnSuceptiblePersons(this.config.START_AMOUNT_SUCEPTIBLE);
     }
 
     // TODO make this a little bit prettier...
@@ -450,8 +435,9 @@ export default class Simulator extends Subject {
      * @returns true or false if the simulation should end with one of the satisfying conditions
      */
     public simulationShouldEnd(): boolean {
-        if (this.simulationStats.recovered == this.AMOUNT_OF_PERSONS) return true;
-        if (this.simulationStats.recovered + this.simulationStats.suceptible == this.AMOUNT_OF_PERSONS) return true;
+        const total = this.config.START_AMOUNT_INFECTED + this.config.START_AMOUNT_SUCEPTIBLE;
+        if (this.simulationStats.recovered == total) return true;
+        if (this.simulationStats.recovered + this.simulationStats.suceptible == total) return true;
         return false;
     }
 

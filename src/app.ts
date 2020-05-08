@@ -28,24 +28,32 @@ const canvFFA = document.getElementById('free-for-all');
 const freeForAll = new Simulator(60, 40, {
     sceneario: SimScenearios.FREE_FOR_ALL,
     canvas: canvFFA ? canvFFA : undefined,
+    START_AMOUNT_SUCEPTIBLE: 199,
+    START_AMOUNT_INFECTED: 1,
 });
 
 const canvForced = document.getElementById('forced-quarantine');
 const forcedQ = new Simulator(60, 40, {
     sceneario: SimScenearios.QUARANTINE_FENCE,
     canvas: canvForced ? canvForced : undefined,
+    START_AMOUNT_SUCEPTIBLE: 199,
+    START_AMOUNT_INFECTED: 1,
 });
 
 const canvQuarter = document.getElementById('one-quarter-free');
 const quarterFree = new Simulator(60, 40, {
     sceneario: SimScenearios.QUARANTINE_QUARTER,
     canvas: canvQuarter ? canvQuarter : undefined,
+    START_AMOUNT_SUCEPTIBLE: 199,
+    START_AMOUNT_INFECTED: 1,
 });
 
 const canvEight = document.getElementById('one-eight-free');
 const eightFree = new Simulator(60, 40, {
     sceneario: SimScenearios.QUARANTINE_EIGHT,
     canvas: canvEight ? canvEight : undefined,
+    START_AMOUNT_SUCEPTIBLE: 199,
+    START_AMOUNT_INFECTED: 1,
 });
 
 // age and death checkboxes
