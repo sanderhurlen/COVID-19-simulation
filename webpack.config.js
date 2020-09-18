@@ -34,10 +34,10 @@ module.exports = {
     },
     output: {
         filename: 'bundle.js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist/'),
     },
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
+        contentBase: path.join(__dirname, 'dist/'),
         compress: true,
         port: 8008,
     },
@@ -49,7 +49,7 @@ module.exports = {
             title: 'COVID-19 Simulator',
         }),
         new MiniCssExtractPlugin({
-            filename: 'css/assets/app.css',
+            filename: '/assets/app.css',
         }),
     ],
 };

@@ -5,7 +5,6 @@
     <meta charset="utf-8" />
     <title><%= htmlWebpackPlugin.options.title %></title>
 
-    <link rel="stylesheet" href="assets/app.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 </head>
@@ -13,10 +12,10 @@
 <body>
     <nav class="level">
         <p class="level-item has-text-centered">
-            <a class="link is-info">About</a>
+            <strong>COVID-19 Simulation</strong>
         </p>
         <p class="level-item has-text-centered">
-            COVID-19 Simulation
+            <a class="link is-info" href="#about">About</a>
         </p>
         <p class="level-item has-text-centered">
             <label for="age-checkbox" class="checkbox">
@@ -31,20 +30,64 @@
             </label>
         </p>
     </nav>
-    <section class="section">
+    <section class="section" id="about">
         <h1 class="title is-1">About the project</h1>
+        <h3 class="title is-3">Del I: Reprodusere scenarioene i Washington Post-artikkelen</h3>
         <p>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatibus exercitationem nobis tempora
-            officiis totam doloremque sunt voluptatem assumenda, expedita iusto temporibus porro corporis ab dicta
-            distinctio iure corrupti blanditiis consequatur. Lorem ipsum dolor sit amet consectetur adipisicing
-            elit. Vitae modi dolor excepturi obcaecati iusto. Quod omnis, labore obcaecati enim culpa aperiam dolor
-            harum esse minima ex pariatur tenetur error sunt. Lorem ipsum dolor sit amet consectetur adipisicing
-            elit. Commodi, expedita. Odit, obcaecati dicta quos eius explicabo, voluptatem, ab ratione animi
-            cupiditate asperiores recusandae eum rerum. Eius quae id molestias voluptate. Lorem ipsum dolor sit amet
-            consectetur adipisicing elit. Debitis voluptatum dolores a delectus, reiciendis alias distinctio
-            veritatis doloremque libero, necessitatibus iure sit possimus eos? Blanditiis explicabo odio reiciendis
-            quos eos.
+            Utgangspunktet for prosjektet blir
+            <a href="https://www.washingtonpost.com/graphics/2020/world/corona-simulator/">denne artikkelen i Washington
+                Post</a>
+            I artikkelen anvendes SIR-modellen (susceptible-infectuous-recovered) for å
+            skissere et svært forenklet bilde av virkeligheten, men som gir mye innsikt i
+            noen essensielle egenskaper av spredningsforløpet.
+
+            <a href="https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology">Her en intro om bl.a.
+                SIR-modeller</a>
+
+            Jeg bruker den samme modellen som i Washington Post-artikkelen,
+            men vi bruker rasterbasert simulering (enten av agenter som beveger seg på
+            et rutenett, eller en cellular automaton). I Wikipedia-artikkelen over vises en
+            slik rasterbasert simulering av en SIR-model.
         </p>
+        <h3 class="title is-3"> Project Goal</h3>
+
+        <h4 class="title is-4">Part 1: Reproduce Washington Post simulation</h4>
+        <ol>
+
+            <li> Reproduce the results from Washington post article</li>
+
+            <p>In the first scenario (free mobility), you are going to adjust the probability for a sick person comes in
+                contact with a random healthy person. This way, every sick person in the beginning of the simulation
+                (the
+                exponential phase), comes in contact with 2.5 other persons, which is the reported value for Corona.</p>
+
+            <li>1. Do you get a similar result of antall/friske/smittsomme/resistant persons as a function of time, as
+                in
+                the WP article for the 4 scenarios?</li>
+            <li>1. If you scale the number of persons and area proporsionally, what is the numbers for the total
+                population
+                in a "imagined land" with , e.g. 100 000 residents.</li>
+        </ol>
+
+        <h4>Part 2: Simulation of number of deaths</h4>
+
+        <p> - Add a probability for a diseased person to die of Corona
+
+            How many of the residents (Imaginary land of 100 000 residents) will die?</p>
+
+        <h4>Part 3: Effect of Age</h4>
+
+        <p>The effect of age has been a factor for the severeness of the disease. Therefore, we add a age parameter.
+        </p>
+
+        <h2 class="title is-2">what i want to learn & use</h2>
+        <ul>
+            <li>Webpack</li>
+            <li>Typescript</li>
+            <li>P5.js</li>
+            <li>Chart.js</li>
+            <li>Mocha for unit testing</li>
+        </ul>
     </section>
 
     <div class="columns">
@@ -54,6 +97,7 @@
                 <div id='chart-container'>
                     <canvas id="sim-1"></canvas>
                 </div>
+                <h4 class="subtitle is-4">Current</h4>
                 <nav class="level">
                     <div class="level-item has-text-centered">
                         <div>
@@ -80,7 +124,7 @@
                         </div>
                     </div>
                 </nav>
-                <h3 class="subtitle is-3">Logged events:</h3>
+                <h4 class="subtitle is-4">Logged events:</h4>
                 <div id="logged-events">
                 </div>
             </section>

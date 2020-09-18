@@ -55,10 +55,6 @@ What happens when a society reverts from quaratine to normal life after a amount
 -   then look at consequences of new infections
 -   Compare with simulations from part 3
 
-## Project requirements
-
--   Have all parts from project fulfilled
-
 ## Simulation data points
 
 #### Have been diseased:
